@@ -9,8 +9,12 @@ The core will have these modules:
 
 ## Exported Class:
  - OL3DCore
-   - init(config)
-   - update(config)
-   - getVRMMovement()
-   - getLandMark()
-   - getVideo()
+   - Core Function
+     - initCore()
+     - getVRMMovement()
+   - Logs
+     - getCoreLog()
+     - getPoI()
+   - Camera
+     - setVideoStream(device_id)
+     - getCameraFrame()

@@ -114,12 +114,15 @@ function normalize3d(p1){
 // holistic worker
 let hworker = null;
 let fworker = null;
-function loadMLModels(onResults, cb){
-    hworker = new Worker("holistic/worker.js");
-    fworker = new Worker("face_mesh/worker.js");
+function loadMLModels(onResults){
+    let ipath = getCMV("INTEGRATION_SUBMODULE_PATH");
+    let hpath = ipath + "/holistic/worker.js";
+    let fpath = ipath + "/face_mesh/worker.js";
+    hworker = new Worker(hpath);
+    fworker = new Worker(fpath);
     hworker.onmessage = onResults;
     fworker.onmessage = onResults;
-    cb();
+    console.log("holistic model connected");
 }
 
 function getMLModel(handtrack){

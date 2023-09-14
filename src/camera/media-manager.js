@@ -30,7 +30,7 @@ function getCurrentVideoId(){
 }
 
 // read video from webcam
-function startCamera(cb){
+function startCamera(){
     navigator.mediaDevices.getUserMedia({
         audio: false, video: {
             facingMode: 'user',
@@ -43,17 +43,15 @@ function startCamera(cb){
         capture.srcObject = stream;
         capture.width = capture.videoWidth;
         capture.height = capture.videoHeight;
+        setCMV("CURRENT_CAMERA_ID",
+            capture.srcObject.getTracks()[0].getSettings()['deviceId']);
     });
-    // signal when capture is ready
-    capture.onloadeddata = cb;
     return capture;
 }
 
 // change current video to a new source
-let resetting = false;
-function setVideoStream(deviceId, cb){
+function setVideoStream(deviceId){
     // stop current video
-    resetting = true;
     capture.srcObject.getTracks().forEach(track => {
         track.stop();
     });
@@ -72,12 +70,10 @@ function setVideoStream(deviceId, cb){
         capture.srcObject = stream;
         capture.width = capture.videoWidth;
         capture.height = capture.videoHeight;
+        setCMV("RESET_CAMERA", true);
+        setCMV("CURRENT_CAMERA_ID",
+            capture.srcObject.getTracks()[0].getSettings()['deviceId']);
     });
-    capture.onloadeddata = cb;
-}
-
-function reSettingDone(){
-    resetting = false;
 }
 
 // video width and height
@@ -92,11 +88,7 @@ function getCameraFrame(){
 
 // validate image readiness
 function checkImage(){
-    if((capture.readyState === 4) && (!resetting)){
-        return true;
-    }else{
-        return false;
-    }
+    return capture.readyState === 4;
 }
 
 let capImage = document.createElement("canvas");

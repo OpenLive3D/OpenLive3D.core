@@ -103,11 +103,19 @@ async function onHolisticResults(results){
         noHandLandmarkResult(1);
     }
 
-    postLog(allLog);
+    postCoreLog(allLog);
     postPoI(allPoI);
     if(results.faceLandmarks){
         pushInfo(tmpInfo);
     }
+}
+
+// call worker with image
+async function postImage(){
+    getMLModel(getCMV("HAND_TRACKING")).postMessage({
+        "metakey": getMetaKey(),
+        "image": getCaptureImage()
+    });
 }
 
 // worker update
@@ -315,4 +323,12 @@ function getVRMMovement(){
     minfo = mergeInfo(minfo, binfo);
 
     return minfo;
+}
+
+// init of core
+function initCore(){
+    // start video
+    startCamera();
+    // load holistic
+    loadMLModels(onWorkerResults);
 }

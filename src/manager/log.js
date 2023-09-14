@@ -2,12 +2,10 @@
 
 let curKeys = {};
 let curPoIs = {};
-function postLog(keys){
-    Object.keys(keys).forEach(function(key){
-        curKeys[key] = keys[key];
-    });
+function postCoreLog(keys){
+    curKeys = keys;
 }
-function getLog(){
+function getCoreLog(){
     return curKeys;
 }
 function postPoI(pois){

@@ -112,7 +112,11 @@ async function onHolisticResults(results){
 
 // call worker with image
 async function postImage(){
-    getMLModel(getCMV("HAND_TRACKING")).postMessage({
+    let modelConfig = {
+        "hand": getCMV("HAND_TRACKING"),
+        "thread": getCMV("MULTI_THREAD")
+    }
+    getMLModel(modelConfig).postMessage({
         "metakey": getMetaKey(),
         "image": getCaptureImage()
     });

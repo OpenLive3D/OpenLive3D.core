@@ -112,29 +112,34 @@ function normalize3d(p1){
 }
 
 // holistic worker
-let hworker = null;
-let fworker = null;
+let hworkerM = null;
+let fworkerM = null;
+let fworkerS = null;
 function loadMLModels(onResults){
     let ipath = getCMV("INTEGRATION_SUBMODULE_PATH");
     let hpath = ipath + "/holistic/worker.js";
     let fpath = ipath + "/face_mesh/worker.js";
-    hworker = new Worker(hpath);
-    fworker = new Worker(fpath);
-    hworker.onmessage = onResults;
-    fworker.onmessage = onResults;
+    hworkerM = new Worker(hpath);
+    hworkerM.onmessage = onResults;
+    fworkerM = new Worker(fpath);
+    fworkerM.onmessage = onResults;
+    fworkerS = new Single(onResults);
+    fworkerS.init();
     console.log("holistic model connected");
 }
 
-function getMLModel(handtrack){
-    if(handtrack){
-        return hworker;
+function getMLModel(modelConfig){
+    if(modelConfig["hand"]){
+        return hworkerM;
+    }else if(modelConfig["thread"]){
+        return fworkerM;
     }else{
-        return fworker;
+        return fworkerS;
     }
 }
 
 function checkMLModel(){
-    if(hworker && fworker){
+    if(hworkerM && fworkerM && fworkerS){
         return true;
     }else{
         return false;

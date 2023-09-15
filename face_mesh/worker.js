@@ -15,7 +15,7 @@ async function init(){
     });
     fModel.onResults(function(results){
         let newResult = {};
-        if("multiFaceLandmarks" in results && results["multiFaceLandmarks"].length == 1){
+        if("multiFaceLandmarks" in results && results["multiFaceLandmarks"].length >= 1){
             newResult["faceLandmarks"] = results["multiFaceLandmarks"][0];
         }
         try{

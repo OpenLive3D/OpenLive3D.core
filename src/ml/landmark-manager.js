@@ -129,12 +129,12 @@ function loadMLModels(onResults){
 }
 
 function getMLModel(modelConfig){
-    if(modelConfig["hand"]){
-        return hworkerM;
-    }else if(modelConfig["thread"]){
-        return fworkerM;
-    }else{
+    if(!modelConfig["thread"]){
         return fworkerS;
+    }else if(modelConfig["hand"]){
+        return hworkerM;
+    }else{
+        return fworkerM;
     }
 }
 

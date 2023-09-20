@@ -113,7 +113,7 @@ async function onHolisticResults(results){
 // call worker with image
 async function postImage(){
     let modelConfig = {
-        "hand": getCMV("HAND_TRACKING"),
+        "mode": getCMV("TRACKING_MODE"),
         "thread": getCMV("MULTI_THREAD")
     }
     getMLModel(modelConfig).postMessage({
@@ -281,7 +281,7 @@ function extractBody(keys){
         radLimit(keys['yaw'] * getCMV('CHEST_RATIO') + leanRatio) * getCMV('VRM_YR'),
         radLimit(keys['roll'] * getCMV('CHEST_RATIO') + tiltRatio) * getCMV('VRM_ZR')];
     // left right arm
-    if(getCMV('HAND_TRACKING')){
+    if(getCMV('TRACKING_MODE') == "Upper-Body"){
         for(let i = 0; i < 2; i ++){
             let prefix = ["left", "right"][i];
             // upperArm, lowerArm

@@ -104,7 +104,7 @@ function loadMLModels(onResults){
 function getMLModel(modelConfig){
     if(!modelConfig["thread"]){
         return fworkerS;
-    }else if(modelConfig["hand"]){
+    }else if(modelConfig["mode"] == "Upper-Body"){
         return hworkerM;
     }else{
         return fworkerM;

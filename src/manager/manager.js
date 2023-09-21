@@ -6,13 +6,15 @@
 // 4. return motion
 
 let tmpInfo = getDefaultInfo();
+let tmpResult = null;
 
 // face landmark resolver
 function onFaceLandmarkResult(keyPoints, faceInfo){
     if(faceInfo){
         Object.keys(faceInfo).forEach(function(key){
             let sr = getSR(getKeyType(key)) / getCMV("SENSITIVITY_SCALE");
-            tmpInfo[key] = (1-sr) * faceInfo[key] + sr * tmpInfo[key];
+            let v = (1-sr) * faceInfo[key] + sr * tmpInfo[key];
+            tmpInfo[key] = isNaN(v) ? 0 : v;
         });
     }
 }
@@ -23,7 +25,8 @@ function onPoseLandmarkResult(keyPoints, poseInfo){
     if(poseInfo){
         Object.keys(poseInfo).forEach(function(key){
             let sr = getSR(getKeyType(key)) / getCMV("SENSITIVITY_SCALE");
-            tmpInfo[key] = (1-sr) * poseInfo[key] + sr * tmpInfo[key];
+            let v = (1-sr) * poseInfo[key] + sr * tmpInfo[key];
+            tmpInfo[key] = isNaN(v) ? 0 : v;
         });
     }
 }
@@ -38,7 +41,8 @@ function onHandLandmarkResult(keyPoints, handInfo, leftright){
         Object.keys(handInfo).forEach(function(key){
             let sr = getSR('hand') / getCMV("SENSITIVITY_SCALE");
             if(key in tmpInfo){
-                tmpInfo[key] = (1-sr) * handInfo[key] + sr * tmpInfo[key];
+                let v = (1-sr) * handInfo[key] + sr * tmpInfo[key];
+                tmpInfo[key] = isNaN(v) ? 0 : v;
             }
         });
     }
@@ -49,7 +53,8 @@ function noHandLandmarkResult(leftright){
     Object.keys(tmpHandInfo).forEach(function(key){
         let sr = getSR(getKeyType(key));
         if(key in tmpInfo){
-            tmpInfo[key] = (1-sr) * tmpHandInfo[key] + sr * tmpInfo[key];
+            let v = (1-sr) * tmpHandInfo[key] + sr * tmpInfo[key];
+            tmpInfo[key] = isNaN(v) ? 0 : v;
         }
     });
 }
@@ -62,6 +67,7 @@ function mergePoints(PoI, tPoI){
     });
 }
 async function onHolisticResults(results){
+    tmpResult = results;
     if(!getCMV("GOOD_TO_GO")){
         console.log("1st Result: ", results);
         setCMV("GOOD_TO_GO", true);

@@ -1,18 +1,24 @@
 // manage metadata for manager evaluation
-let metadata = {"key": 0, "time": 0};
+let metadata = {
+    "key": 0,
+    "time": 0
+};
 
 // healthcheck metadata
-function setNewMeta(){
+function setNewMeta() {
     metadata["key"] = Date.now();
     metadata["time"] = metadata["key"];
     console.log("set new metadata:", metadata);
 }
-function correctMeta(){
+
+function correctMeta() {
     metadata["time"] = Date.now();
 }
-function getMetaKey(){
+
+function getMetaKey() {
     return metadata["key"];
 }
-function getMetaTime(){
+
+function getMetaTime() {
     return metadata["time"];
 }

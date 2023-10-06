@@ -11,32 +11,32 @@ const FPoI = {
     "leftbrow": [336, 334]
 };
 
-function getOpenRatio(obj){
+function getOpenRatio(obj) {
     let width = distance3d(obj[0], obj[1]);
     let height = distance3d(obj[2], obj[3]);
     return height / width;
 }
 
-function getPosRatio(obj){
+function getPosRatio(obj) {
     let dleft = distance3d(obj[0], obj[4]);
     let dright = distance3d(obj[1], obj[4]);
     return dleft / (dleft + dright);
 }
 
-function getHeadRotation(head){
+function getHeadRotation(head) {
     let rollSlope = slope(0, 1, head[1], head[0]);
     let roll = Math.atan(rollSlope);
     let yawSlope = slope(0, 2, head[1], head[0]);
     let yaw = Math.atan(yawSlope);
     let pitchSlope = slope(2, 1, head[2], head[3]);
     let pitch = Math.atan(pitchSlope);
-    if(pitch > 0){
+    if (pitch > 0) {
         pitch -= Math.PI;
     }
     return [roll, pitch + Math.PI / 2, yaw];
 }
 
-function getHeadXYZ(head){
+function getHeadXYZ(head) {
     let wh = getCameraWH();
     let topx = head[2][0];
     let topy = head[2][1];
@@ -48,27 +48,27 @@ function getHeadXYZ(head){
     return [x, y, z];
 }
 
-function getMoodAutoDraft(mouth){
+function getMoodAutoDraft(mouth) {
     let mbalance = average3d(mouth[0], mouth[1]);
     let mmove = average3d(mouth[2], mouth[3]);
     let absauto = Math.min(1, distance2d(mbalance, mmove) / distance3d(mouth[0], mouth[1]));
-    if(mbalance[1] > mmove[1]){ // compare Y
+    if (mbalance[1] > mmove[1]) { // compare Y
         return -absauto;
-    }else{
+    } else {
         return absauto;
     }
 }
 
-function getMoodAuto(autoDraft, headRotate){
+function getMoodAuto(autoDraft, headRotate) {
     let absYaw = Math.abs(headRotate[2]);
-    if(autoDraft > 0){
+    if (autoDraft > 0) {
         return Math.max(0, autoDraft - absYaw / 1.5);
-    }else{
+    } else {
         return Math.min(0, autoDraft + absYaw / 1.5);
     }
 }
 
-function getBrowsRatio(face){
+function getBrowsRatio(face) {
     let htop = face["head"][2];
     let hmid = face["head"][4];
     let letop = face["lefteye"][2];
@@ -84,19 +84,19 @@ function getBrowsRatio(face){
     return d2 / (d1 + d2);
 }
 
-function getKeyType(key){
-    if(["roll", "pitch", "yaw"].includes(key)){
+function getKeyType(key) {
+    if (["roll", "pitch", "yaw"].includes(key)) {
         return "head";
-    }else if(["leftEyeOpen", "rightEyeOpen", "irisPos"].includes(key)){
+    } else if (["leftEyeOpen", "rightEyeOpen", "irisPos"].includes(key)) {
         return "eye";
-    }else if(["mouth"].includes(key)){
+    } else if (["mouth"].includes(key)) {
         return "mouth";
-    }else{
+    } else {
         return "body";
     }
 }
 
-function face2Info(face){
+function face2Info(face) {
     let keyInfo = {};
     let headRotate = getHeadRotation(face["head"]);
     let headXYZ = getHeadXYZ(face["head"]);
@@ -117,15 +117,16 @@ function face2Info(face){
 }
 
 // reduce vertices to the desired set, and compress data as well
-function packFaceHolistic(_face){
+function packFaceHolistic(_face) {
     let wh = getCameraWH();
-    function pointUnpack(p){
+
+    function pointUnpack(p) {
         return [p.x * wh[0], p.y * wh[1], p.z * wh[1]];
     }
     let ret = {};
-    Object.keys(FPoI).forEach(function(key){
+    Object.keys(FPoI).forEach(function(key) {
         ret[key] = [];
-        for(let i = 0; i < FPoI[key].length; i++){
+        for (let i = 0; i < FPoI[key].length; i++) {
             ret[key][i] = pointUnpack(_face[FPoI[key][i]]);
         }
     });

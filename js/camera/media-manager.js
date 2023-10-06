@@ -2,22 +2,30 @@ let capture = document.createElement("video");
 capture.playsinline = "playsinline";
 capture.autoplay = "autoplay";
 
-const defaultWidth = 640, defaultHeight = 480;
-const scaleWidth = {min: defaultWidth};
-const scaleHeight = {min: defaultHeight};
+const defaultWidth = 640,
+    defaultHeight = 480;
+const scaleWidth = {
+    min: defaultWidth
+};
+const scaleHeight = {
+    min: defaultHeight
+};
 capture.width = defaultWidth;
 capture.height = defaultHeight;
 
 // list cameras
-function listCameras(cb){
+function listCameras(cb) {
     let carr = [];
     let count = 1;
     navigator.mediaDevices.enumerateDevices().then(darr => {
         darr.forEach(mediaDevice => {
-            if(mediaDevice.kind === 'videoinput'){
+            if (mediaDevice.kind === 'videoinput') {
                 let id = mediaDevice.deviceId;
                 let name = mediaDevice.label || `Camera ${count++}`;
-                carr.push({"id": id, "name": name});
+                carr.push({
+                    "id": id,
+                    "name": name
+                });
             }
         })
         cb(carr);
@@ -25,19 +33,20 @@ function listCameras(cb){
 }
 
 // get current video device id
-function getCurrentVideoId(){
+function getCurrentVideoId() {
     return capture.srcObject.getTracks()[0].getSettings()['deviceId'];
 }
 
 // read video from webcam
-function startCamera(){
+function startCamera() {
     navigator.mediaDevices.getUserMedia({
-        audio: false, video: {
+        audio: false,
+        video: {
             facingMode: 'user',
             width: scaleWidth,
             height: scaleHeight,
         }
-    }).then(function(stream){
+    }).then(function(stream) {
         console.log("video initialized");
         window.stream = stream;
         capture.srcObject = stream;
@@ -50,7 +59,7 @@ function startCamera(){
 }
 
 // change current video to a new source
-function setVideoStream(deviceId){
+function setVideoStream(deviceId) {
     // stop current video
     capture.srcObject.getTracks().forEach(track => {
         track.stop();
@@ -59,12 +68,15 @@ function setVideoStream(deviceId){
         track.stop();
     });
     navigator.mediaDevices.getUserMedia({
-        audio: false, video: {
-            deviceId: deviceId ? {exact: deviceId} : undefined,
+        audio: false,
+        video: {
+            deviceId: deviceId ? {
+                exact: deviceId
+            } : undefined,
             width: scaleWidth,
             height: scaleHeight,
         }
-    }).then(function(stream){
+    }).then(function(stream) {
         console.log("video stream set: ", deviceId);
         window.stream = stream;
         capture.srcObject = stream;
@@ -77,25 +89,28 @@ function setVideoStream(deviceId){
 }
 
 // video width and height
-function getCameraWH(){
+function getCameraWH() {
     return [capture.videoWidth, capture.videoHeight];
 }
 
 // return the capture as frame
-function getCameraFrame(){
+function getCameraFrame() {
     return capture;
 }
 
 // validate image readiness
-function checkImage(){
+function checkImage() {
     return capture.readyState === 4;
 }
 
 let capImage = document.createElement("canvas");
-let capCtx = capImage.getContext('2d', {willReadFrequently: true});
-capImage.width  = defaultWidth;
+let capCtx = capImage.getContext('2d', {
+    willReadFrequently: true
+});
+capImage.width = defaultWidth;
 capImage.height = defaultHeight;
-function getCaptureImage(){
+
+function getCaptureImage() {
     capCtx.drawImage(capture, 0, 0);
     return capCtx.getImageData(0, 0, defaultWidth, defaultHeight);
 }

@@ -11,14 +11,14 @@ const HPoI = {
     "pinky": [17, 18, 20]
 };
 
-function getThumbRatio(hand, prefix){
+function getThumbRatio(hand, prefix) {
     let base = hand[prefix + "paw"][2];
     let d1 = distance3d(hand[prefix + "paw"][1], base);
     let d2 = distance3d(hand[prefix + "thumb"][2], base);
     return (d2 - d1) / d1;
 }
 
-function getHandSpread(hand, prefix){
+function getHandSpread(hand, prefix) {
     let indexFinger = hand[prefix + "index"];
     let pinkyFinger = hand[prefix + "pinky"];
     let d1 = distance3d(indexFinger[0], pinkyFinger[0]);
@@ -26,11 +26,11 @@ function getHandSpread(hand, prefix){
     return (d2 - d1) / d1;
 }
 
-function getIMRPRatio(hand, prefix){
+function getIMRPRatio(hand, prefix) {
     let arr = ["index", "middle", "ring", "pinky"];
     let res = [];
     let base = hand[prefix + "paw"][0];
-    for(let i = 0; i < arr.length; i++){
+    for (let i = 0; i < arr.length; i++) {
         let d1 = distance3d(hand[prefix + arr[i]][0], base);
         let d2 = distance3d(hand[prefix + arr[i]][2], base);
         res[i] = (d2 - d1) / d1;
@@ -38,7 +38,7 @@ function getIMRPRatio(hand, prefix){
     return res;
 }
 
-function getHandRotation(hand, leftright){
+function getHandRotation(hand, leftright) {
     let prefix = ["left", "right"][leftright];
     let lrRatio = 1 - leftright * 2;
     let i0 = prefix + "ring";
@@ -49,22 +49,22 @@ function getHandRotation(hand, leftright){
     let roll = Math.atan(rollSlope);
     let yawSlope = slope(0, 2, hand[i1][0], hand[i0][0]);
     let yaw = Math.atan(yawSlope);
-    if((hand[i1][0][0] > hand[i0][0][0]) != (prefix == "right")){
+    if ((hand[i1][0][0] > hand[i0][0][0]) != (prefix == "right")) {
         roll *= -1;
         yaw -= Math.PI * lrRatio;
     }
     let pitchSlope = slope(2, 1, hand[i2][0], hand[i3][0]);
     let pitch = Math.atan(pitchSlope) + Math.PI / 2;
-    if(pitch > Math.PI / 2){
+    if (pitch > Math.PI / 2) {
         pitch -= Math.PI;
     }
-    if(hand[i2][0][1] > hand[i3][0][1]){
+    if (hand[i2][0][1] > hand[i3][0][1]) {
         pitch -= Math.PI;
     }
     return [roll, pitch, yaw];
 }
 
-function getDefaultHandInfo(leftright){
+function getDefaultHandInfo(leftright) {
     let prefix = ["left", "right"][leftright];
     let lrRatio = 1 - leftright * 2;
     let keyInfo = {};
@@ -80,7 +80,7 @@ function getDefaultHandInfo(leftright){
     return keyInfo;
 }
 
-function hand2Info(hand, leftright){
+function hand2Info(hand, leftright) {
     let keyInfo = {};
     let prefix = ["left", "right"][leftright];
     let imrp = getIMRPRatio(hand, prefix);
@@ -97,16 +97,17 @@ function hand2Info(hand, leftright){
     return keyInfo;
 }
 
-function packHandHolistic(_hand, leftright){
+function packHandHolistic(_hand, leftright) {
     let wh = getCameraWH();
     let prefix = ["left", "right"][leftright];
-    function pointUnpack(p){
+
+    function pointUnpack(p) {
         return [p.x * wh[0], p.y * wh[1], p.z * wh[1]];
     }
     let ret = {};
-    Object.keys(HPoI).forEach(function(key){
+    Object.keys(HPoI).forEach(function(key) {
         ret[prefix + key] = [];
-        for(let i = 0; i < HPoI[key].length; i++){
+        for (let i = 0; i < HPoI[key].length; i++) {
             ret[prefix + key][i] = pointUnpack(_hand[HPoI[key][i]]);
         }
     });

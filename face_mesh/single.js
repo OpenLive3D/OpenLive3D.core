@@ -4,14 +4,16 @@ class Single {
     metakey = 0;
     cb = null;
 
-    constructor(cb){
-        this.fModel = new FaceMesh({locateFile: (file) => {
-            if(file == "face_mesh_solution_packed_assets.data"){
-                return "./ol3dc/face_mesh/face_mesh_solution_packed_assets.data";
-            }else{
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/${file}`;
+    constructor(cb) {
+        this.fModel = new FaceMesh({
+            locateFile: (file) => {
+                if (file == "face_mesh_solution_packed_assets.data") {
+                    return "./ol3dc/face_mesh/face_mesh_solution_packed_assets.data";
+                } else {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/${file}`;
+                }
             }
-        }});
+        });
         this.fModel.setOptions({
             maxNumFaces: 1,
             refineLandmarks: true,
@@ -22,29 +24,32 @@ class Single {
         this.fModelInit = true;
         this.cb = cb;
     }
-    init(){
+    init() {
         let this2 = this;
-        this.fModel.onResults(function(results){
+        this.fModel.onResults(function(results) {
             let newResult = {};
-            if("multiFaceLandmarks" in results && results["multiFaceLandmarks"].length >= 1){
+            if ("multiFaceLandmarks" in results && results["multiFaceLandmarks"].length >= 1) {
                 newResult["faceLandmarks"] = results["multiFaceLandmarks"][0];
             }
-            try{
-                this2.cb({"data": {
-                    "metakey": this2.metakey,
-                    "results": newResult
-                }});
-            }
-            catch(err){
+            try {
+                this2.cb({
+                    "data": {
+                        "metakey": this2.metakey,
+                        "results": newResult
+                    }
+                });
+            } catch (err) {
                 console.log(err);
             }
         });
     }
 
-    async postMessage(data){
-        if(this.fModelInit && data["metakey"] && data["image"]){
+    async postMessage(data) {
+        if (this.fModelInit && data["metakey"] && data["image"]) {
             this.metakey = data["metakey"];
-            await this.fModel.send({image: data["image"]});
+            await this.fModel.send({
+                image: data["image"]
+            });
         }
     }
 }

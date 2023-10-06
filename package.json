@@ -1,0 +1,17 @@
+{
+  "name": "ol3dc",
+  "version": "1.0.0",
+  "description": "The core of OpenLive3D",
+  "scripts": {
+    "build": "bash build/build.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OpenLive3D/OpenLive3D.core.git"
+  },
+  "author": "Wei-1",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "js-beautify": "^1.14.9"
+  }
+}

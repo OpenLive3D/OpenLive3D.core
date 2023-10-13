@@ -1,6 +1,6 @@
 // version configuration
-const DEV_DATE = "2023-10-11";
-const VERSION = "v.2.1.3";
+const DEV_DATE = "2023-10-13";
+const VERSION = "v.2.1.4";
 const CONFIG_VERSION = "Beta.1.2.12";
 
 let configManager = {};
@@ -107,7 +107,8 @@ let defaultConfig = {
     'INTEGRATION_SUBMODULE_PATH': "ol3dc",
     'IN_MOOD_SELECT': false,
     'IN_TRACKING_MODE_SELECT': false,
-    'TEST_MOBILE_ENTRY': false
+    'TEST_MOBILE_ENTRY': false,
+    'TEST_SAFARI_ENTRY': false
 };
 
 function getDefaultCMV(key) {
@@ -132,7 +133,8 @@ function getSystemParameters() {
         'GOOD_TO_GO', 'LOADING_SCENE', 'MOOD',
         'CURRENT_CAMERA_ID', 'RESET_CAMERA',
         'IN_MOOD_SELECT', 'IN_TRACKING_MODE_SELECT',
-        'INTEGRATION_SUBMODULE_PATH', 'TEST_MOBILE_ENTRY'];
+        'INTEGRATION_SUBMODULE_PATH',
+        'TEST_MOBILE_ENTRY', 'TEST_SAFARI_ENTRY'];
 }
 
 function getSavedSystemParameters() {

@@ -93,6 +93,15 @@ function getCameraWH() {
     return [capture.videoWidth, capture.videoHeight];
 }
 
+function checkCameraPaused() {
+    return capture.paused;
+}
+
+// force video play
+function playCapture() {
+    capture.play();
+}
+
 // return the capture as frame
 function getCameraFrame() {
     return capture;

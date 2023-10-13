@@ -922,14 +922,20 @@ function drawMobile() {
 // https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas
 function drawSafari() {
     let loadbox = document.getElementById('loadinfo');
-    loadbox.innerHTML = "";
-    let tmp1 = document.createElement('p');
+    loadbox.innerHTML = "<br/>";
+    let tmp1 = document.createElement('button');
     tmp1.style.color = 'red';
-    tmp1.innerHTML = getL("SAFARI NOT SUPPORTED!!");
+    tmp1.innerHTML = getL("Enable OpenLive3D Safari Version!");
+    tmp1.onclick = function() {
+        console.log("Enable Safari Parameters!");
+        setCMV("MULTI_THREAD", false);
+        setCMV("TEST_SAFARI_ENTRY", true);
+        requestAnimationFrame(initLoop);
+        playCapture();
+    }
     loadbox.appendChild(tmp1);
     let tmp2 = document.createElement('p');
-    tmp2.innerHTML = getL("Safari has no stable support for image processing in web-worker today (2023-03-12)");
-    tmp2.innerHTML += " " + getL("Please use other browsers for now.");
+    tmp2.innerHTML = getL("Safari has no stable support for image processing in web-worker today (2023-10-13)");
     loadbox.appendChild(tmp2);
 }
 

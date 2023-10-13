@@ -390,7 +390,7 @@ function checkVRMModel() {
 function initLoop() {
     if (window.mobileCheck() && !getCMV("TEST_MOBILE_ENTRY")) {
         drawMobile();
-    } else if (window.browserCheck() == "Safari" && !getCMV("TEST_MOBILE_ENTRY")) {
+    } else if (window.browserCheck() == "Safari" && !getCMV("TEST_SAFARI_ENTRY")) {
         drawSafari();
     } else {
         drawLoading();

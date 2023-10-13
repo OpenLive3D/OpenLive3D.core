@@ -11,6 +11,9 @@ systembox.onclick = function() {
         sidebar.style.display = "none";
         moodbar.style.display = "block";
     }
+    if (checkCameraPaused()) {
+        playCapture();
+    }
 };
 let systemtext = document.getElementById("systemtext");
 systembox.onmouseover = function() {
@@ -180,7 +183,6 @@ function createLayout() {
     vrmbtn.setAttribute("accept", ".vrm");
     vrmbtn.style.display = "none";
     vrmbtn.onchange = function() {
-        let txt = "";
         if ('files' in vrmbtn && vrmbtn.files.length > 0) {
             let files = vrmbtn.files;
             let file = files[0];

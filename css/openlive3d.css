@@ -35,6 +35,12 @@ div.loadbox {
     z-index: 5;
     background-color: #ffff;
 }
+div.webcambox {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: -5;
+}
 div.effectkey {
     color: #fff;
     cursor: pointer;

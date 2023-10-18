@@ -1,6 +1,4 @@
-let capture = document.createElement("video");
-capture.playsinline = "playsinline";
-capture.autoplay = "autoplay";
+let capture = document.getElementById("webcam");
 
 const defaultWidth = 640,
     defaultHeight = 480;

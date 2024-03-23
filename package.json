@@ -1,6 +1,6 @@
 {
   "name": "ol3dc",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "The core of OpenLive3D",
   "scripts": {
     "build": "bash build/build.sh"

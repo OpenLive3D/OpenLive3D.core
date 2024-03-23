@@ -107,7 +107,11 @@ function getCameraFrame() {
 
 // validate image readiness
 function checkImage() {
-    return capture.readyState === 4;
+    if (capture) {
+        return capture.readyState === 4;
+    } else {
+        return false;
+    }
 }
 
 let capImage = document.createElement("canvas");

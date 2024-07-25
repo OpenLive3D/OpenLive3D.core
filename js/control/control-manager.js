@@ -120,9 +120,9 @@ function updatePosition(keys) {
         let Ch = currentVrm.humanoid;
         let hips = Ch.getNormalizedBoneNode(Tvrmshbn.Hips).position;
         // position update
-        hips.x = defaultXYZ[0] - keys['x'] * getCMV("POSITION_X_RATIO");
-        hips.y = defaultXYZ[1] - keys['y'] * getCMV("POSITION_Y_RATIO");
-        hips.z = defaultXYZ[2] + keys['z'] * getCMV("POSITION_Z_RATIO");
+        hips.x = defaultXYZ[0] - keys['x'] * getCMV("POSITION_X_RATIO") * getCMV("POSITION_TRACKING");
+        hips.y = defaultXYZ[1] - keys['y'] * getCMV("POSITION_Y_RATIO") * getCMV("POSITION_TRACKING");
+        hips.z = defaultXYZ[2] + keys['z'] * getCMV("POSITION_Z_RATIO") * getCMV("POSITION_TRACKING");
         // breath offset update
         let bos = getCMV("BREATH_STRENGTH") / 100 * Math.sin(clock.elapsedTime * Math.PI * getCMV('BREATH_FREQUENCY'));
         if (isNaN(bos)) {

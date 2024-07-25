@@ -1,6 +1,6 @@
 // version configuration
-const DEV_DATE = "2024-03-23";
-const VERSION = "v.2.1.5";
+const DEV_DATE = "2024-07-25";
+const VERSION = "v.2.1.6";
 const CONFIG_VERSION = "Beta.1.2.12";
 
 let configManager = {};
@@ -50,6 +50,7 @@ let defaultConfig = {
     'HAND_STABLIZE_RATIO': 0.05,
     'FINGER_GRIP_RATIO': 1.0,
     'FINGER_SPREAD_RATIO': 1.5,
+    'POSITION_TRACKING': true,
     'POSITION_X_RATIO': 0.12,
     'POSITION_Y_RATIO': 0.12,
     'POSITION_Z_RATIO': 0.12,
@@ -322,7 +323,8 @@ function getBinaryCM() {
         'MOOD_ANGRY', 'MOOD_SORROW',
         'MOOD_FUN', 'MOOD_JOY',
         'MOOD_NEUTRAL', 'MOOD_AUTO', 'MULTI_THREAD',
-        'UI_TRACKING_MODE_COLLAPSE', 'UI_MOOD_COLLAPSE'];
+        'UI_TRACKING_MODE_COLLAPSE', 'UI_MOOD_COLLAPSE',
+        'POSITION_TRACKING'];
 }
 
 function getSelectCM() {
@@ -544,6 +546,11 @@ function getConfigModifiers() {
             'range': [0, 5]
         }],
         'POSITION': [{
+            'key': 'POSITION_TRACKING',
+            'title': 'Position Tracking',
+            'describe': 'Enable x,y,z tracking for the user or not.',
+            'valid': [true, false]
+        }, {
             'key': 'POSITION_X_RATIO',
             'title': 'Position X Ratio',
             'describe': 'The larger the number is, the faster the VRM model move horizontally. Range(-1, 1)',

@@ -56,6 +56,16 @@ function startCamera() {
     return capture;
 }
 
+function stopCamera(){
+    const toggleCameraValue = getCMV('TOGGLE_CAMERA');
+    if (toggleCameraValue) {
+        window.stream.getTracks().forEach(track => track.stop());
+        console.log('Camera turned off')
+    } else {
+        startCamera();
+    }
+}
+
 // change current video to a new source
 function setVideoStream(deviceId) {
     // stop current video

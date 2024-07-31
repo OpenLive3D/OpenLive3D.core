@@ -451,6 +451,9 @@ function createLayout() {
                     if (key == 'UI') {
                         createMoodLayout();
                     }
+                    if (configitem['key'] === 'TOGGLE_CAMERA') {
+                        stopCamera();
+                    }
                 };
             } else if (getSelectCM().includes(configitem['key'])) {
                 item.style.display = "none";

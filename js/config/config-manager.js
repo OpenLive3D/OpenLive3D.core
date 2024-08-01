@@ -354,8 +354,8 @@ function getConfigModifiers() {
             'valid': [true, false]
         }, {
             'key': 'TOGGLE_CAMERA',
-            'title': 'Toggle camera',
-            'describe': 'Turns on/off camera.',
+            'title': 'Toggle Camera',
+            'describe': 'Turn on/off camera.',
             'valid': [true, false]
         }, {
             'key': 'LANGUAGE',

@@ -452,7 +452,11 @@ function createLayout() {
                         createMoodLayout();
                     }
                     if (configitem['key'] === 'TOGGLE_CAMERA') {
-                        stopCamera();
+                        if (item.checked) {
+                            stopCamera();
+                        } else {
+                            startCamera();
+                        }
                     }
                 };
             } else if (getSelectCM().includes(configitem['key'])) {

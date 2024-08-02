@@ -15,6 +15,7 @@ let defaultConfig = {
     'BG_COLOR': "#00CC00",
     'BG_UPLOAD': "",
     'CAMERA_FLIP': true,
+    'TOGGLE_CAMERA': false,
     'BREATH_FREQUENCY': 0.3,
     'BREATH_STRENGTH': 1,
     'MOOD_AUTO_RATIO': 4,
@@ -319,7 +320,7 @@ function getL(str) {
 let availableTrackingMode = ["Face-Only", "Upper-Body"];
 
 function getBinaryCM() {
-    return ['SAVE_SETTING', 'CAMERA_FLIP', 'EYE_SYNC',
+    return ['SAVE_SETTING', 'CAMERA_FLIP', 'TOGGLE_CAMERA', 'EYE_SYNC',
         'MOOD_ANGRY', 'MOOD_SORROW',
         'MOOD_FUN', 'MOOD_JOY',
         'MOOD_NEUTRAL', 'MOOD_AUTO', 'MULTI_THREAD',
@@ -350,6 +351,11 @@ function getConfigModifiers() {
             'key': 'CAMERA_FLIP',
             'title': 'Camera Flip',
             'describe': 'Flip the camera horizontally.',
+            'valid': [true, false]
+        }, {
+            'key': 'TOGGLE_CAMERA',
+            'title': 'Toggle Camera',
+            'describe': 'Turn on/off camera.',
             'valid': [true, false]
         }, {
             'key': 'LANGUAGE',

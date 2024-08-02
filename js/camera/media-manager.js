@@ -56,6 +56,11 @@ function startCamera() {
     return capture;
 }
 
+function stopCamera(){
+    window.stream.getTracks().forEach(track => track.stop());
+    console.log('Camera turned off');
+}
+
 // change current video to a new source
 function setVideoStream(deviceId) {
     // stop current video

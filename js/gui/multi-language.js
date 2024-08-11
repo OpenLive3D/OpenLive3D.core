@@ -15,6 +15,16 @@ let languageBox = [{
     "en": 'Visual Effect',
     "zh": '視覺特效'
 }, {
+    "en": 'Music (BGM)',
+    "zh": '', //
+    "jp": '音楽（ＢＧＭ）'
+},
+ {
+    "en": 'Delete',
+    "zh": '', //delete
+    "jp": '消す'
+},
+ {
     "en": 'Setting',
     "zh": '設定',
     "hindi": 'सेटिंग',

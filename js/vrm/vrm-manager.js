@@ -7,7 +7,7 @@ let defaultPose = [
     [TVRMSHBN.LeftLowerArm, [-20, -30, 10]],
     [TVRMSHBN.RightLowerArm, [-20, 30, -10]],
     [TVRMSHBN.LeftHand, [0, 0, 0]],
-    [TVRMSHBN.RightHand, [0, 0, 0]]
+    [TVRMSHBN.RightHand, [0, 0, 0]],
 ];
 
 function setDefaultPose(vrm) {

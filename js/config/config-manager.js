@@ -14,6 +14,7 @@ let defaultConfig = {
     'MULTI_THREAD': true,
     'BG_COLOR': "#00CC00",
     'BG_UPLOAD': "",
+    'BGM': "",
     'CAMERA_FLIP': true,
     'TOGGLE_CAMERA': false,
     'BREATH_FREQUENCY': 0.3,
@@ -333,7 +334,7 @@ function getSelectCM() {
 }
 
 function getSideBoxes() {
-    return ["vrmbox", "dbgbox", "confbox", "logbox"];
+    return ["vrmbox", "dbgbox", "confbox", "logbox", "musicbox"];
 }
 
 function getLogItems() {
@@ -582,6 +583,6 @@ function getConfigModifiers() {
             'title': 'Collapse Mood UI',
             'describe': 'Change the UI selection framework format',
             'valid': [true, false]
-        }]
+        }],
     };
 }

@@ -2,6 +2,19 @@
 
 function initEffect() {}
 
+
+function getEffectByKey(key) {
+    const allEffects = getAllEffects();
+    for (let effects in allEffects) {
+        for (let type of allEffects[effects]) {
+            if (type.key === key) {
+                return type;
+            } 
+        }
+    }
+    return null; 
+}
+
 function getAllEffects() {
     return {
         "BACKGROUND": [{
@@ -14,6 +27,15 @@ function getAllEffects() {
             'title': 'Upload Image',
             'describe': 'Upload an image as your background',
             'type': 'background'
+        }, {
+            'key': 'BLUR_BG',
+            'title': 'Blur effect',
+            'describe': 'Blurs background image. Note: There has to be a BG to apply blur effects',
+            'type': 'screen',
+            'enableEffect': enableBlurEffect,
+            'disableEffect': disableBlurEffect,
+            'updateEffect': updateBlurEffect,
+            'parameters': bgParameters 
         }],
         "Screen Modification": [{
             'key': 'BLUR',

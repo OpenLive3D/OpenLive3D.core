@@ -170,6 +170,65 @@ function createBGColorLayout(group) {
     group.appendChild(item);
 }
 
+//updates GUI everytime song is added / updated
+let songList = []
+
+function updateMusicList() {
+    const musicList = document.getElementById("musiclist")
+    musicList.innerHTML = "" 
+    
+    songList.forEach((music, index) => {
+        const listItem = document.createElement('div') //Box 
+        listItem.className = "music-item"
+        listItem.style.display = "flex"  
+        listItem.style.alignItems = "center"  
+    
+        //decode
+        const arrayBuffer = music.data 
+        const blob = new Blob([arrayBuffer], { type: 'audio/mp3' }) 
+        const url = URL.createObjectURL(blob) 
+
+        //assign url to new audio object
+        const audio = new Audio(url)  
+        audio.controls = true   
+        audio.style.marginTop = "10px"
+        listItem.appendChild(audio)
+    
+        //element
+        const deleteBtn = document.createElement('button')
+        //dom object manipulation
+        deleteBtn.innerText = getL('Delete')
+        deleteBtn.style.marginTop = "10px"
+        deleteBtn.style.marginLeft = "10px"  
+        deleteBtn.style.padding = "3%"
+        deleteBtn.style.backgroundColor = "red"
+        deleteBtn.style.color = "white"
+        deleteBtn.style.borderRadius = "10%"
+        deleteBtn.onclick = () => {
+            const songId = songList[index].id
+            songList.splice(index, 1)
+            deleteSong(songId)
+            updateMusicList()
+        }
+        listItem.appendChild(deleteBtn)
+
+        const loopBtn = document.createElement('button')
+        loopBtn.innerText = "⟳Loop"
+        loopBtn.style.marginTop = "10px"
+        loopBtn.style.marginLeft = "10px"
+        loopBtn.style.padding = "3%"
+        loopBtn.style.backgroundColor = "orange"
+        loopBtn.style.color = "white"
+        loopBtn.style.borderRadius = "10%"
+        loopBtn.onclick = () => {
+            audio.loop = !audio.loop
+            loopBtn.innerText = audio.loop ? "Looping" : "⟳Loop"
+        }
+        listItem.appendChild(loopBtn)
+        musicList.appendChild(listItem)
+    })
+}
+
 function createLayout() {
     setBackGround();
 
@@ -276,6 +335,7 @@ function createLayout() {
     // effect modifier
     let effectbox = document.getElementById("effectbox");
     effectbox.innerHTML = "";
+    //all effects
     let alleffects = getAllEffects();
     Object.keys(alleffects).forEach(function(key) {
         let effectkey = document.createElement('div');
@@ -300,7 +360,9 @@ function createLayout() {
         effectgroup.className = "w3-margin w3-hide";
         effectgroup.id = "effectgroup_" + key;
         effectbox.appendChild(effectgroup);
+        //effectlist
         let effectlist = alleffects[key];
+        //effectitem
         for (let effectitem of effectlist) {
             let info = document.createElement('text');
             info.className = "w3-tooltip";
@@ -315,6 +377,7 @@ function createLayout() {
             itemtext.className = "w3-tooltip";
             itemtext.style.color = "#fff";
             itemtext.innerHTML = " " + effectitem['title'] + " ";
+            //effect 
             effectgroup.appendChild(itemtext);
             if (effectitem['key'] == "BG_UPLOAD") {
                 createBGImageLayout(effectgroup)
@@ -327,13 +390,15 @@ function createLayout() {
                 itemcheck.checked = false;
                 itemcheck.onclick = function() {
                     if (itemcheck.checked) {
-                        effectitem['enableEffect']();
+                        //invokation and pass in keys
+                        effectitem['enableEffect'](effectitem['key']);
                         itemdiv.style.display = "block";
                     } else {
-                        effectitem['disableEffect']();
+                        effectitem['disableEffect'](effectitem['key']);  
                         itemdiv.style.display = "none";
                     }
                 }
+                
                 effectgroup.appendChild(itemcheck);
                 let itemdiv = document.createElement('div');
                 itemdiv.style.display = "none";
@@ -395,6 +460,39 @@ function createLayout() {
         }
     });
 
+    //music
+        let songCounter = 0;
+        let musicboxbtn = document.getElementById("musicboxbutton")
+        musicboxbtn.innerHTML = getL("Music"); 
+        let musicbox = document.getElementById("musicbox") 
+        musicbox.innerHTML = ""   //
+        let musicbtn = document.createElement('input')
+        musicbtn.setAttribute("type", "file")
+        musicbtn.setAttribute("accept", ".mp3")
+        musicbox.appendChild(musicbtn)
+        musicbtn.onchange = function() {  //.onclick = () => {}
+            if (musicbtn.files.length > 0) {
+                let file = musicbtn.files[0]
+                const reader = new FileReader()
+                reader.onload = function(event) {
+                    //encode mp3 audio file to binary format. turns out this doesnt reduce storage utilization. 
+                    const arrayBuffer = event.target.result
+                    songCounter++
+                    const song = {id: songCounter, name: file.name, data: arrayBuffer }
+                    songList.push(song)
+                    addSong(song) 
+                    updateMusicList() //function  declared globally within gui.js
+                }
+                reader.readAsArrayBuffer(file)
+                musicbtn.value = '' //manually reset input selection
+            } 
+        }
+        musicbox.appendChild(musicbtn)
+        let musicList = document.createElement('div')
+        musicList.id = "musiclist"
+        musicbox.appendChild(musicList)
+    openIndex() //located in clientStorage / index.js
+        
     // config modifier
     let confbox = document.getElementById("confbox");
     confbox.innerHTML = "";
@@ -473,6 +571,7 @@ function createLayout() {
                 }
                 itemselect.onchange = function myFunction() {
                     setCMV(configitem['key'], itemselect.value);
+                    //switches Language
                     if (configitem['key'] == "LANGUAGE") {
                         createLayout();
                     } else if (configitem['key'] == "TRACKING_MODE") {

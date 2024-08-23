@@ -27,15 +27,6 @@ function getAllEffects() {
             'title': 'Upload Image',
             'describe': 'Upload an image as your background',
             'type': 'background'
-        }, {
-            'key': 'BLUR_BG',
-            'title': 'Blur effect',
-            'describe': 'Blurs background image. Note: There has to be a BG to apply blur effects',
-            'type': 'screen',
-            'enableEffect': enableBlurEffect,
-            'disableEffect': disableBlurEffect,
-            'updateEffect': updateBlurEffect,
-            'parameters': bgParameters 
         }],
         "Screen Modification": [{
             'key': 'BLUR',

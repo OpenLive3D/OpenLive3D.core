@@ -170,7 +170,7 @@ function createBGColorLayout(group) {
     group.appendChild(item);
 }
 
-//updates GUI everytime song is added / updated
+//
 let songList = []
 
 function updateMusicList() {
@@ -196,7 +196,6 @@ function updateMusicList() {
     
         //element
         const deleteBtn = document.createElement('button')
-        //dom object manipulation
         deleteBtn.innerText = getL('Delete')
         deleteBtn.style.marginTop = "10px"
         deleteBtn.style.marginLeft = "10px"  
@@ -390,15 +389,13 @@ function createLayout() {
                 itemcheck.checked = false;
                 itemcheck.onclick = function() {
                     if (itemcheck.checked) {
-                        //invokation and pass in keys
-                        effectitem['enableEffect'](effectitem['key']);
+                        effectitem['enableEffect']();
                         itemdiv.style.display = "block";
                     } else {
-                        effectitem['disableEffect'](effectitem['key']);  
+                        effectitem['disableEffect']();  
                         itemdiv.style.display = "none";
                     }
                 }
-                
                 effectgroup.appendChild(itemcheck);
                 let itemdiv = document.createElement('div');
                 itemdiv.style.display = "none";
@@ -461,38 +458,39 @@ function createLayout() {
     });
 
     //music
-        let songCounter = 0;
-        let musicboxbtn = document.getElementById("musicboxbutton")
-        musicboxbtn.innerHTML = getL("Music"); 
-        let musicbox = document.getElementById("musicbox") 
-        musicbox.innerHTML = ""   //
-        let musicbtn = document.createElement('input')
-        musicbtn.setAttribute("type", "file")
-        musicbtn.setAttribute("accept", ".mp3")
-        musicbox.appendChild(musicbtn)
-        musicbtn.onchange = function() {  //.onclick = () => {}
-            if (musicbtn.files.length > 0) {
-                let file = musicbtn.files[0]
-                const reader = new FileReader()
-                reader.onload = function(event) {
-                    //encode mp3 audio file to binary format. turns out this doesnt reduce storage utilization. 
-                    const arrayBuffer = event.target.result
-                    songCounter++
-                    const song = {id: songCounter, name: file.name, data: arrayBuffer }
-                    songList.push(song)
-                    addSong(song) 
-                    updateMusicList() //function  declared globally within gui.js
-                }
-                reader.readAsArrayBuffer(file)
-                musicbtn.value = '' //manually reset input selection
-            } 
+    let songCounter = 0;
+    let musicboxbtn = document.getElementById("musicboxbutton")
+    musicboxbtn.innerHTML = getL("Music"); 
+    let musicbox = document.getElementById("musicbox") 
+    musicbox.innerHTML = ""   //
+    let musicbtn = document.createElement('input')
+    musicbtn.setAttribute("type", "file")
+    musicbtn.setAttribute("accept", ".mp3")
+    musicbox.appendChild(musicbtn)
+    musicbtn.onchange = function() {  //.onclick = () => {}
+        if (musicbtn.files.length > 0) {
+            let file = musicbtn.files[0]
+            const reader = new FileReader()
+            reader.onload = function(event) {
+                const arrayBuffer = event.target.result
+                songCounter++
+                const song = {id: songCounter, name: file.name, data: arrayBuffer }
+                songList.push(song)
+                addSong(song) 
+                updateMusicList() 
+            }
+            reader.readAsArrayBuffer(file)
+            musicbtn.value = '' 
         }
-        musicbox.appendChild(musicbtn)
-        let musicList = document.createElement('div')
-        musicList.id = "musiclist"
-        musicbox.appendChild(musicList)
-    openIndex() //located in clientStorage / index.js
-        
+    }
+    musicbox.appendChild(musicbtn)
+    let musicList = document.createElement('div')
+    musicList.id = "musiclist"
+    musicbox.appendChild(musicList)
+    openIndex() 
+    
+
+
     // config modifier
     let confbox = document.getElementById("confbox");
     confbox.innerHTML = "";
@@ -571,7 +569,6 @@ function createLayout() {
                 }
                 itemselect.onchange = function myFunction() {
                     setCMV(configitem['key'], itemselect.value);
-                    //switches Language
                     if (configitem['key'] == "LANGUAGE") {
                         createLayout();
                     } else if (configitem['key'] == "TRACKING_MODE") {

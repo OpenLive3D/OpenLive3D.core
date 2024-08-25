@@ -191,18 +191,12 @@ function updateMusicList() {
         //assign url to new audio object
         const audio = new Audio(url)  
         audio.controls = true   
-        audio.style.marginTop = "10px"
+        audio.style.height = "28.5px"
         listItem.appendChild(audio)
     
         //element
         const deleteBtn = document.createElement('button')
         deleteBtn.innerText = getL('Delete')
-        deleteBtn.style.marginTop = "10px"
-        deleteBtn.style.marginLeft = "10px"  
-        deleteBtn.style.padding = "3%"
-        deleteBtn.style.backgroundColor = "red"
-        deleteBtn.style.color = "white"
-        deleteBtn.style.borderRadius = "10%"
         deleteBtn.onclick = () => {
             const songId = songList[index].id
             songList.splice(index, 1)
@@ -213,12 +207,7 @@ function updateMusicList() {
 
         const loopBtn = document.createElement('button')
         loopBtn.innerText = "⟳Loop"
-        loopBtn.style.marginTop = "10px"
-        loopBtn.style.marginLeft = "10px"
-        loopBtn.style.padding = "3%"
-        loopBtn.style.backgroundColor = "orange"
-        loopBtn.style.color = "white"
-        loopBtn.style.borderRadius = "10%"
+        loopBtn.style.height = "28.5px"
         loopBtn.onclick = () => {
             audio.loop = !audio.loop
             loopBtn.innerText = audio.loop ? "Looping" : "⟳Loop"
@@ -462,12 +451,12 @@ function createLayout() {
     let musicboxbtn = document.getElementById("musicboxbutton")
     musicboxbtn.innerHTML = getL("Music"); 
     let musicbox = document.getElementById("musicbox") 
-    musicbox.innerHTML = ""   //
+    musicbox.innerHTML = ""   
     let musicbtn = document.createElement('input')
     musicbtn.setAttribute("type", "file")
     musicbtn.setAttribute("accept", ".mp3")
     musicbox.appendChild(musicbtn)
-    musicbtn.onchange = function() {  //.onclick = () => {}
+    musicbtn.onchange = function() {  
         if (musicbtn.files.length > 0) {
             let file = musicbtn.files[0]
             const reader = new FileReader()

@@ -3,18 +3,6 @@
 function initEffect() {}
 
 
-function getEffectByKey(key) {
-    const allEffects = getAllEffects();
-    for (let effects in allEffects) {
-        for (let type of allEffects[effects]) {
-            if (type.key === key) {
-                return type;
-            } 
-        }
-    }
-    return null; 
-}
-
 function getAllEffects() {
     return {
         "BACKGROUND": [{

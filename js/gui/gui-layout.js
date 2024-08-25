@@ -170,6 +170,55 @@ function createBGColorLayout(group) {
     group.appendChild(item);
 }
 
+//
+let songList = []
+
+function updateMusicList() {
+    const musicList = document.getElementById("musiclist")
+    musicList.innerHTML = ""
+
+    songList.forEach((music, index) => {
+        const listItem = document.createElement('div') //Box 
+        listItem.className = "music-item"
+        listItem.style.display = "flex"
+        listItem.style.alignItems = "center"
+
+        //decode
+        const arrayBuffer = music.data
+        const blob = new Blob([arrayBuffer], {
+            type: 'audio/mp3'
+        })
+        const url = URL.createObjectURL(blob)
+
+        //assign url to new audio object
+        const audio = new Audio(url)
+        audio.controls = true
+        audio.style.height = "28.5px"
+        listItem.appendChild(audio)
+
+        //element
+        const deleteBtn = document.createElement('button')
+        deleteBtn.innerText = getL('Delete')
+        deleteBtn.onclick = () => {
+            const songId = songList[index].id
+            songList.splice(index, 1)
+            deleteSong(songId)
+            updateMusicList()
+        }
+        listItem.appendChild(deleteBtn)
+
+        const loopBtn = document.createElement('button')
+        loopBtn.innerText = "⟳Loop"
+        loopBtn.style.height = "28.5px"
+        loopBtn.onclick = () => {
+            audio.loop = !audio.loop
+            loopBtn.innerText = audio.loop ? "Looping" : "⟳Loop"
+        }
+        listItem.appendChild(loopBtn)
+        musicList.appendChild(listItem)
+    })
+}
+
 function createLayout() {
     setBackGround();
 
@@ -276,6 +325,7 @@ function createLayout() {
     // effect modifier
     let effectbox = document.getElementById("effectbox");
     effectbox.innerHTML = "";
+    //all effects
     let alleffects = getAllEffects();
     Object.keys(alleffects).forEach(function(key) {
         let effectkey = document.createElement('div');
@@ -300,7 +350,9 @@ function createLayout() {
         effectgroup.className = "w3-margin w3-hide";
         effectgroup.id = "effectgroup_" + key;
         effectbox.appendChild(effectgroup);
+        //effectlist
         let effectlist = alleffects[key];
+        //effectitem
         for (let effectitem of effectlist) {
             let info = document.createElement('text');
             info.className = "w3-tooltip";
@@ -315,6 +367,7 @@ function createLayout() {
             itemtext.className = "w3-tooltip";
             itemtext.style.color = "#fff";
             itemtext.innerHTML = " " + effectitem['title'] + " ";
+            //effect 
             effectgroup.appendChild(itemtext);
             if (effectitem['key'] == "BG_UPLOAD") {
                 createBGImageLayout(effectgroup)
@@ -394,6 +447,44 @@ function createLayout() {
             effectgroup.appendChild(document.createElement("br"));
         }
     });
+
+    //music
+    let songCounter = 0;
+    let musicboxbtn = document.getElementById("musicboxbutton")
+    musicboxbtn.innerHTML = getL("Music");
+    let musicbox = document.getElementById("musicbox")
+    musicbox.innerHTML = ""
+    let musicbtn = document.createElement('input')
+    musicbtn.setAttribute("type", "file")
+    musicbtn.setAttribute("accept", ".mp3")
+    musicbox.appendChild(musicbtn)
+    musicbtn.onchange = function() {
+        if (musicbtn.files.length > 0) {
+            let file = musicbtn.files[0]
+            const reader = new FileReader()
+            reader.onload = function(event) {
+                const arrayBuffer = event.target.result
+                songCounter++
+                const song = {
+                    id: songCounter,
+                    name: file.name,
+                    data: arrayBuffer
+                }
+                songList.push(song)
+                addSong(song)
+                updateMusicList()
+            }
+            reader.readAsArrayBuffer(file)
+            musicbtn.value = ''
+        }
+    }
+    musicbox.appendChild(musicbtn)
+    let musicList = document.createElement('div')
+    musicList.id = "musiclist"
+    musicbox.appendChild(musicList)
+    openIndex()
+
+
 
     // config modifier
     let confbox = document.getElementById("confbox");

@@ -2,293 +2,303 @@
 let defaultLanguage = "en";
 let availableLanguage = ["en", "zh", "hindi", "jp"];
 let languageBox = [{
-    "en": 'Model Manager',
-    "zh": '模型管理',
-    "hindi": 'मॉडल प्रबंधक',
-    "jp": 'モデルマネージャー'
+        "en": 'Model Manager',
+        "zh": '模型管理',
+        "hindi": 'मॉडल प्रबंधक',
+        "jp": 'モデルマネージャー'
 }, {
-    "en": 'Video Control',
-    "zh": '錄影鏡頭管理',
-    "hindi": 'वीडियो नियंत्रण',
-    "jp": 'ビデオ制御'
+        "en": 'Video Control',
+        "zh": '錄影鏡頭管理',
+        "hindi": 'वीडियो नियंत्रण',
+        "jp": 'ビデオ制御'
 }, {
-    "en": 'Visual Effect',
-    "zh": '視覺特效'
+        "en": 'Visual Effect',
+        "zh": '視覺特效'
 }, {
-    "en": 'Setting',
-    "zh": '設定',
-    "hindi": 'सेटिंग',
-    "jp": '設定'
+        "en": 'Music',
+        "zh": '音樂',
+        "jp": '音楽（ＢＧＭ）'
+},
+    {
+        "en": 'Delete',
+        "zh": '刪除',
+        "jp": '消す'
+},
+    {
+        "en": 'Setting',
+        "zh": '設定',
+        "hindi": 'सेटिंग',
+        "jp": '設定'
 }, {
-    "en": 'Parameters',
-    "zh": '參數',
-    "hindi": 'पैरामीटर',
-    "jp": 'パラメータ'
+        "en": 'Parameters',
+        "zh": '參數',
+        "hindi": 'पैरामीटर',
+        "jp": 'パラメータ'
 }, {
-    "en": 'Upload VRM Model',
-    "zh": '上傳 VRM 模型',
-    "hindi": 'VRM मॉडल अपलोड करें',
-    "jp": 'VRMモデルのアップロード'
+        "en": 'Upload VRM Model',
+        "zh": '上傳 VRM 模型',
+        "hindi": 'VRM मॉडल अपलोड करें',
+        "jp": 'VRMモデルのアップロード'
 }, {
-    "en": 'Set VRM URL',
-    "zh": '設定 VRM 網址',
-    "hindi": 'VRM URL सेट करें',
-    "jp": 'Vrm URLを設定する'
+        "en": 'Set VRM URL',
+        "zh": '設定 VRM 網址',
+        "hindi": 'VRM URL सेट करें',
+        "jp": 'Vrm URLを設定する'
 }, {
-    "en": 'Set URL',
-    "zh": '確認網址',
-    "hindi": 'URL सेट करें',
-    "jp": 'URLを設定する'
+        "en": 'Set URL',
+        "zh": '確認網址',
+        "hindi": 'URL सेट करें',
+        "jp": 'URLを設定する'
 }, {
-    "en": 'Image',
-    "zh": '圖像',
-    "hindi": 'फोटो',
-    "jp": 'イメージ'
+        "en": 'Image',
+        "zh": '圖像',
+        "hindi": 'फोटो',
+        "jp": 'イメージ'
 }, {
-    "en": 'Landmark',
-    "zh": '標記',
-    "hindi": 'लैंडमार्क',
-    "jp": 'ランドマーク'
+        "en": 'Landmark',
+        "zh": '標記',
+        "hindi": 'लैंडमार्क',
+        "jp": 'ランドマーク'
 }, {
-    "en": 'Save Setting',
-    "hindi": 'सेटिंग्स सेव करें',
-    "jp": '設定の保存'
+        "en": 'Save Setting',
+        "hindi": 'सेटिंग्स सेव करें',
+        "jp": '設定の保存'
 }, {
-    "en": 'Save your settings in your browser as the cookie.',
-    "hindi": 'अपने ब्राउज़र में कुकी के रूप में अपनी सेटिंग',
-    "jp": 'クッキーとしてブラウザに設定を保存します'
+        "en": 'Save your settings in your browser as the cookie.',
+        "hindi": 'अपने ब्राउज़र में कुकी के रूप में अपनी सेटिंग',
+        "jp": 'クッキーとしてブラウザに設定を保存します'
 }, {
-    "en": 'Camera Flip',
-    "hindi": 'कैमरा फ्लिप',
-    "jp": 'カメラフリップ'
+        "en": 'Camera Flip',
+        "hindi": 'कैमरा फ्लिप',
+        "jp": 'カメラフリップ'
 }, {
-    "en": 'Flip the camera horizontally.'
+        "en": 'Flip the camera horizontally.'
 }, {
-    "en": 'Language'
+        "en": 'Language'
 }, {
-    "en": 'Select the language for the user interface.'
+        "en": 'Select the language for the user interface.'
 }, {
-    "en": 'Breath Frequency'
+        "en": 'Breath Frequency'
 }, {
-    "en": 'Breath count per second, default as 0.3. Range(0, 4)'
+        "en": 'Breath count per second, default as 0.3. Range(0, 4)'
 }, {
-    "en": 'Breath Strength'
+        "en": 'Breath Strength'
 }, {
-    "en": 'The moving length of breathing effect, default as 1. Range(0, 10)'
+        "en": 'The moving length of breathing effect, default as 1. Range(0, 10)'
 }, {
-    "en": 'MOOD_AUTO Ratio'
+        "en": 'MOOD_AUTO Ratio'
 }, {
-    "en": 'The dramatic-degree of the auto-mood detection, default as 2. Range(0, 10)'
+        "en": 'The dramatic-degree of the auto-mood detection, default as 2. Range(0, 10)'
 }, {
-    "en": 'MOOD_AUTO Offset'
+        "en": 'MOOD_AUTO Offset'
 }, {
-    "en": 'Auto-mood works when the value is larger than the offset, default as 0.1. Range(0, 1)'
+        "en": 'Auto-mood works when the value is larger than the offset, default as 0.1. Range(0, 1)'
 }, {
-    "en": '3D_FPS Limit'
+        "en": '3D_FPS Limit'
 }, {
-    "en": 'The FPS limit for 3D rendering visualization, default as 120. Range(1, 120)'
+        "en": 'The FPS limit for 3D rendering visualization, default as 120. Range(1, 120)'
 }, {
-    "en": 'ML_FPS Limit'
+        "en": 'ML_FPS Limit'
 }, {
-    "en": 'The FPS limit for ML computation, default as 120. Range(1, 120)'
+        "en": 'The FPS limit for ML computation, default as 120. Range(1, 120)'
 }, {
-    "en": 'Background Color'
+        "en": 'Background Color'
 }, {
-    "en": 'Accept Color Code with "#" or "rgba", "hsla"'
+        "en": 'Accept Color Code with "#" or "rgba", "hsla"'
 }, {
-    "en": 'Upload Image'
+        "en": 'Upload Image'
 }, {
-    "en": 'Upload an image as your background'
+        "en": 'Upload an image as your background'
 }, {
-    "en": 'Sensitivity Scale'
+        "en": 'Sensitivity Scale'
 }, {
-    "en": 'The higher this value is, the more overall sensitive it is to human movement, default as 1. Range(0.1, 3).'
+        "en": 'The higher this value is, the more overall sensitive it is to human movement, default as 1. Range(0.1, 3).'
 }, {
-    "en": 'Motion Blur Ratio'
+        "en": 'Motion Blur Ratio'
 }, {
-    "en": 'The higher this value is, the smoother the body motion is, default as 1.5. Range(0, 10).'
+        "en": 'The higher this value is, the smoother the body motion is, default as 1.5. Range(0, 10).'
 }, {
-    "en": 'Momentum Ratio'
+        "en": 'Momentum Ratio'
 }, {
-    "en": 'The higher this value is, the smoother the body motion is, default as 1.5. Range(0, 10).'
+        "en": 'The higher this value is, the smoother the body motion is, default as 1.5. Range(0, 10).'
 }, {
-    "en": 'Head Rotate Ratio'
+        "en": 'Head Rotate Ratio'
 }, {
-    "en": 'The multiplication parameter to rotate the head as the head rotation. Range(-2, 2)'
+        "en": 'The multiplication parameter to rotate the head as the head rotation. Range(-2, 2)'
 }, {
-    "en": 'Neck Rotate Ratio'
+        "en": 'Neck Rotate Ratio'
 }, {
-    "en": 'The multiplication parameter to rotate the neck as the head rotation. Range(-2, 2)'
+        "en": 'The multiplication parameter to rotate the neck as the head rotation. Range(-2, 2)'
 }, {
-    "en": 'Chest Rotate Ratio'
+        "en": 'Chest Rotate Ratio'
 }, {
-    "en": 'The multiplication parameter to rotate the chest as the head rotation. Range(-2, 2)'
+        "en": 'The multiplication parameter to rotate the chest as the head rotation. Range(-2, 2)'
 }, {
-    "en": 'Head Stablize Ratio'
+        "en": 'Head Stablize Ratio'
 }, {
-    "en": 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)'
+        "en": 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)'
 }, {
-    "en": 'Body Stablize Ratio'
+        "en": 'Body Stablize Ratio'
 }, {
-    "en": 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)'
+        "en": 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)'
 }, {
-    "en": 'Mouth Open Offset'
+        "en": 'Mouth Open Offset'
 }, {
-    "en": 'Mouth will only open after the openness value is larger than the offset. Range(0, 1)'
+        "en": 'Mouth will only open after the openness value is larger than the offset. Range(0, 1)'
 }, {
-    "en": 'Mouth Open Ratio'
+        "en": 'Mouth Open Ratio'
 }, {
-    "en": 'The multiplication parameter for mouth openness. Range(0, 20)'
+        "en": 'The multiplication parameter for mouth openness. Range(0, 20)'
 }, {
-    "en": 'Mouth Stablize Ratio'
+        "en": 'Mouth Stablize Ratio'
 }, {
-    "en": 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)'
+        "en": 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)'
 }, {
-    "en": 'Brows Open Offset'
+        "en": 'Brows Open Offset'
 }, {
-    "en": 'Brows will only open after the openness value is larger than the offset. Range(0, 1)'
+        "en": 'Brows will only open after the openness value is larger than the offset. Range(0, 1)'
 }, {
-    "en": 'Brows Open Ratio'
+        "en": 'Brows Open Ratio'
 }, {
-    "en": 'The multiplication parameter for brows openness. Range(0, 20)'
+        "en": 'The multiplication parameter for brows openness. Range(0, 20)'
 }, {
-    "en": 'Brows Stablize Ratio'
+        "en": 'Brows Stablize Ratio'
 }, {
-    "en": 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)'
+        "en": 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)'
 }, {
-    "en": 'Eyes Sync'
+        "en": 'Eyes Sync'
 }, {
-    "en": 'Force the eyes to sync or not. Accept "true|false" value'
+        "en": 'Force the eyes to sync or not. Accept "true|false" value'
 }, {
-    "en": 'Eyes Link'
+        "en": 'Eyes Link'
 }, {
-    "en": 'The threshold that control the coherent of the 2 eyes. When the absolute difference of the 2 eyes openness is smaller then the value, the 2 eyes will move together. Range(0, 1)'
+        "en": 'The threshold that control the coherent of the 2 eyes. When the absolute difference of the 2 eyes openness is smaller then the value, the 2 eyes will move together. Range(0, 1)'
 }, {
-    "en": 'Eye Stablize Ratio'
+        "en": 'Eye Stablize Ratio'
 }, {
-    "en": 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)'
+        "en": 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)'
 }, {
-    "en": 'Iris Offset'
+        "en": 'Iris Offset'
 }, {
-    "en": 'The offset of iris turning, default 0.0. Range(-1, 1)'
+        "en": 'The offset of iris turning, default 0.0. Range(-1, 1)'
 }, {
-    "en": 'Iris Ratio'
+        "en": 'Iris Ratio'
 }, {
-    "en": 'The ratio of iris turning speed, default 5.0. Range(0, 20)'
+        "en": 'The ratio of iris turning speed, default 5.0. Range(0, 20)'
 }, {
-    "en": 'Right Eye Close'
+        "en": 'Right Eye Close'
 }, {
-    "en": 'Close the eye when the openness is small than the threshold. Range(0, 1)'
+        "en": 'Close the eye when the openness is small than the threshold. Range(0, 1)'
 }, {
-    "en": 'Right Eye Open'
+        "en": 'Right Eye Open'
 }, {
-    "en": 'Fully open the eye when the openness is larger than the threshold. Range(0, 1)'
+        "en": 'Fully open the eye when the openness is larger than the threshold. Range(0, 1)'
 }, {
-    "en": 'Right Eye Squint'
+        "en": 'Right Eye Squint'
 }, {
-    "en": 'The ratio of half-open eye between fully open and close. Range(0, 1)'
+        "en": 'The ratio of half-open eye between fully open and close. Range(0, 1)'
 }, {
-    "en": 'Left Eye Close'
+        "en": 'Left Eye Close'
 }, {
-    "en": 'Close the eye when the openness is small than the threshold. Range(0, 1)'
+        "en": 'Close the eye when the openness is small than the threshold. Range(0, 1)'
 }, {
-    "en": 'Left Eye Open'
+        "en": 'Left Eye Open'
 }, {
-    "en": 'Fully open the eye when the openness is larger than the threshold. Range(0, 1)'
+        "en": 'Fully open the eye when the openness is larger than the threshold. Range(0, 1)'
 }, {
-    "en": 'Left Eye Squint'
+        "en": 'Left Eye Squint'
 }, {
-    "en": 'The ratio of half-open eye between fully open and close. Range(0, 1)'
+        "en": 'The ratio of half-open eye between fully open and close. Range(0, 1)'
 }, {
-    "en": 'Hand Tracking'
+        "en": 'Hand Tracking'
 }, {
-    "en": 'Hand tracking is enabled or not.'
+        "en": 'Hand tracking is enabled or not.'
 }, {
-    "en": 'Hand Stablize Ratio'
+        "en": 'Hand Stablize Ratio'
 }, {
-    "en": 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)'
+        "en": 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)'
 }, {
-    "en": 'Finger Grip Ratio'
+        "en": 'Finger Grip Ratio'
 }, {
-    "en": 'Control the grip ratio of fingers. Default to 1. Range(0, 5)'
+        "en": 'Control the grip ratio of fingers. Default to 1. Range(0, 5)'
 }, {
-    "en": 'Finger Spread Ratio'
+        "en": 'Finger Spread Ratio'
 }, {
-    "en": 'Control the spread ratio of fingers. Default to 1. Range(0, 5)'
+        "en": 'Control the spread ratio of fingers. Default to 1. Range(0, 5)'
 }, {
-    "en": 'Position X Ratio'
+        "en": 'Position X Ratio'
 }, {
-    "en": 'The larger the number is, the faster the VRM model move horizontally. Range(-1, 1)'
+        "en": 'The larger the number is, the faster the VRM model move horizontally. Range(-1, 1)'
 }, {
-    "en": 'Position Y Ratio'
+        "en": 'Position Y Ratio'
 }, {
-    "en": 'The larger the number is, the faster the VRM model move vertically. Range(-1, 1)'
+        "en": 'The larger the number is, the faster the VRM model move vertically. Range(-1, 1)'
 }, {
-    "en": 'Position Z Ratio'
+        "en": 'Position Z Ratio'
 }, {
-    "en": 'The larger the number is, the faster the VRM model move forward and backward. Range(-1, 1)'
+        "en": 'The larger the number is, the faster the VRM model move forward and backward. Range(-1, 1)'
 }, {
-    "en": "Upload VRM Model"
+        "en": "Upload VRM Model"
 }, {
-    "en": "Set VRM URL"
+        "en": "Set VRM URL"
 }, {
-    "en": "Official Discord"
+        "en": "Official Discord"
 }, {
-    "en": "general"
+        "en": "general"
 }, {
-    "en": "face"
+        "en": "face"
 }, {
-    "en": "pose"
+        "en": "pose"
 }, {
-    "en": "left_hand"
+        "en": "left_hand"
 }, {
-    "en": "right_hand"
+        "en": "right_hand"
 }, {
-    "en": 'GENERAL'
+        "en": 'GENERAL'
 }, {
-    "en": 'BACKGROUND'
+        "en": 'BACKGROUND'
 }, {
-    "en": 'SMOOTH'
+        "en": 'SMOOTH'
 }, {
-    "en": 'BODY'
+        "en": 'BODY'
 }, {
-    "en": 'MOUTH'
+        "en": 'MOUTH'
 }, {
-    "en": 'BROWS'
+        "en": 'BROWS'
 }, {
-    "en": 'EYE_GENERAL'
+        "en": 'EYE_GENERAL'
 }, {
-    "en": 'EYE_RIGHT'
+        "en": 'EYE_RIGHT'
 }, {
-    "en": 'EYE_LEFT'
+        "en": 'EYE_LEFT'
 }, {
-    "en": 'HAND'
+        "en": 'HAND'
 }, {
-    "en": 'POSITION'
+        "en": 'POSITION'
 }, {
-    "en": "ALERT: Full Screen / Wrong Tab<br/>Browser will stop rendering when other program enters full screen!"
+        "en": "ALERT: Full Screen / Wrong Tab<br/>Browser will stop rendering when other program enters full screen!"
 }, {
-    "en": "ALERT: Error<br/>ML loop stop running, might need to restart to validate."
+        "en": "ALERT: Error<br/>ML loop stop running, might need to restart to validate."
 }, {
-    "en": "ALERT: Hardware Acceleration<br/>ML loop is running extremely slow, check if hardware acceleration is opened."
+        "en": "ALERT: Hardware Acceleration<br/>ML loop is running extremely slow, check if hardware acceleration is opened."
 }, {
-    "en": "ALERT: Ultra Fast<br/>ML loop is running slowly, improve performance by using FACE-ONLY mode."
+        "en": "ALERT: Ultra Fast<br/>ML loop is running slowly, improve performance by using FACE-ONLY mode."
 }, {
-    "en": "ALERT: Slow<br/>Feel free to contact developer for more information."
+        "en": "ALERT: Slow<br/>Feel free to contact developer for more information."
 }, {
-    "en": "MOBILE NOT SUPPORTED!!"
+        "en": "MOBILE NOT SUPPORTED!!"
 }, {
-    "en": "SAFARI NOT SUPPORTED!!"
+        "en": "SAFARI NOT SUPPORTED!!"
 }, {
-    "en": "Safari has no stable support for image processing in web-worker today (2023-03-12)"
+        "en": "Safari has no stable support for image processing in web-worker today (2023-03-12)"
 }, {
-    "en": "Please use other browsers for now."
+        "en": "Please use other browsers for now."
 }, {
-    "en": "Integration Validating..."
+        "en": "Integration Validating..."
 }, {
-    "en": "VRM-Model Loading..."
+        "en": "VRM-Model Loading..."
 }, {
-    "en": "FaceLandMark-Model Loading..."
+        "en": "FaceLandMark-Model Loading..."
 }, {
-    "en": "Camera Loading..."
+        "en": "Camera Loading..."
 }];

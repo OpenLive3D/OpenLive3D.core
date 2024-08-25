@@ -2,6 +2,7 @@
 
 function initEffect() {}
 
+
 function getAllEffects() {
     return {
         "BACKGROUND": [{

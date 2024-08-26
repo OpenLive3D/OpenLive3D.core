@@ -207,7 +207,6 @@ function updateMusicList() {
 
         const loopBtn = document.createElement('button')
         loopBtn.innerText = "⟳Loop"
-        loopBtn.style.height = "28.5px"
         loopBtn.onclick = () => {
             audio.loop = !audio.loop
             loopBtn.innerText = audio.loop ? "Looping" : "⟳Loop"

@@ -41,16 +41,19 @@ function loadSongs() {
 }
 
 function addSong(song) {
-    const transaction = Db.transaction(['songs'], 'readwrite')
-    const objectStore = transaction.objectStore('songs')
-    const request = objectStore.add(song)
+    const transaction = Db.transaction(['songs'], 'readwrite');
+    const objectStore = transaction.objectStore('songs');
+    const request = objectStore.add({
+        name: song.name,
+        data: song.data
+    });
 
-    request.onsuccess = function() {
-        console.log('Song successfully added:', song)
-    }
+    request.onsuccess = function(event) {
+        console.log('Song successfully added:', event.target.result);
+    };
     request.onerror = function(event) {
-        console.error('Error adding song:', event.target.errorCode)
-    }
+        console.error('Error adding song:', event.target.errorCode);
+    };
 }
 
 function deleteSong(id) {
@@ -60,6 +63,7 @@ function deleteSong(id) {
 
     request.onsuccess = function() {
         console.log('Song successfully deleted:', id)
+        loadSongs();
     }
     request.onerror = function(event) {
         console.error('Error deleting song :', event.target.errorCode)

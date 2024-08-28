@@ -1,4 +1,5 @@
 let Db
+
 function openIndex() {
     //https://developer.mozilla.org/en-US/docs/Web/API/IDBCursor/key
     //https://developer.mozilla.org/en-US/docs/Web/API/IDBCursor/request

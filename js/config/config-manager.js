@@ -56,7 +56,7 @@ let defaultConfig = {
     'POSITION_X_RATIO': 0.12,
     'POSITION_Y_RATIO': 0.12,
     'POSITION_Z_RATIO': 0.12,
-    'UI_TRACKING_MODE_COLLAPSE': true,
+    'UI_TRACKING_MODE_COLLAPSE': false,
     'UI_MOOD_COLLAPSE': false,
     // system parameters
     'VERSION': VERSION,
@@ -318,7 +318,7 @@ function getL(str) {
     return str;
 }
 
-let availableTrackingMode = ["Face-Only", "Upper-Body"];
+let availableTrackingMode = ["Face-Only", "Upper-Body", "Heart"];
 
 function getBinaryCM() {
     return ['SAVE_SETTING', 'CAMERA_FLIP', 'TOGGLE_CAMERA', 'EYE_SYNC',

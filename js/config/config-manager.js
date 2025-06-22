@@ -1,6 +1,6 @@
 // version configuration
-const DEV_DATE = "2025-04-04";
-const VERSION = "v.2.2.1";
+const DEV_DATE = "2025-06-22";
+const VERSION = "v.2.2.2";
 const CONFIG_VERSION = "Beta.1.2.12";
 
 let configManager = {};
@@ -370,7 +370,7 @@ function getConfigModifiers() {
             'range': [0, 4]
         }, {
             'key': 'BREATH_STRENGTH',
-            'title': 'Breath Strength',
+            'title': 'Breath Ratio',
             'describe': 'The moving length of breathing effect, default as 1. Range(0, 10)',
             'range': [0, 10]
         }, {
@@ -401,7 +401,7 @@ function getConfigModifiers() {
         }],
         'SMOOTH': [{
             'key': 'SENSITIVITY_SCALE',
-            'title': 'Sensitivity Scale',
+            'title': 'Sensitivity Ratio',
             'describe': 'The higher this value is, the more overall sensitive it is to human movement, default as 1. Range(0.1, 3).',
             'range': [0.1, 3]
         }, {
@@ -432,44 +432,44 @@ function getConfigModifiers() {
             'range': [-2, 2]
         }, {
             'key': 'HEAD_STABLIZE_RATIO',
-            'title': 'Head Stablize Ratio',
+            'title': 'Head Smooth',
             'describe': 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)',
             'range': [0, 0.95]
         }, {
             'key': 'BODY_STABLIZE_RATIO',
-            'title': 'Body Stablize Ratio',
+            'title': 'Body Smooth',
             'describe': 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)',
             'range': [0, 0.95]
         }],
         'MOUTH': [{
             'key': 'MOUTH_OPEN_OFFSET',
-            'title': 'Mouth Open Offset',
+            'title': 'Mouth Offset',
             'describe': 'Mouth will only open after the openness value is larger than the offset. Range(0, 1)',
             'range': [0, 1]
         }, {
             'key': 'MOUTH_RATIO',
-            'title': 'Mouth Open Ratio',
+            'title': 'Mouth Ratio',
             'describe': 'The multiplication parameter for mouth openness. Range(0, 20)',
             'range': [0, 20]
         }, {
             'key': 'MOUTH_STABLIZE_RATIO',
-            'title': 'Mouth Stablize Ratio',
+            'title': 'Mouth Smooth',
             'describe': 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)',
             'range': [0, 0.95]
         }],
         'BROWS': [{
             'key': 'BROWS_OFFSET',
-            'title': 'Brows Open Offset',
+            'title': 'Brows Offset',
             'describe': 'Brows will only open after the openness value is larger than the offset. Range(0, 1)',
             'range': [0, 1]
         }, {
             'key': 'BROWS_RATIO',
-            'title': 'Brows Open Ratio',
+            'title': 'Brows Ratio',
             'describe': 'The multiplication parameter for brows openness. Range(0, 20)',
             'range': [0, 20]
         }, {
             'key': 'BROWS_STABLIZE_RATIO',
-            'title': 'Brows Stablize Ratio',
+            'title': 'Brows Smooth',
             'describe': 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)',
             'range': [0, 0.95]
         }],
@@ -480,12 +480,12 @@ function getConfigModifiers() {
             'valid': [true, false]
         }, {
             'key': 'EYE_LINK_THRESHOLD',
-            'title': 'Eyes Link',
+            'title': 'Eyes Sync Offset',
             'describe': 'The threshold that control the coherent of the 2 eyes. When the absolute difference of the 2 eyes openness is smaller then the value, the 2 eyes will move together. Range(0, 1)',
             'range': [0, 1]
         }, {
             'key': 'EYE_STABLIZE_RATIO',
-            'title': 'Eye Stablize Ratio',
+            'title': 'Eyes Smooth',
             'describe': 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)',
             'range': [0, 0.95]
         }, {
@@ -501,33 +501,33 @@ function getConfigModifiers() {
         }],
         'EYE_RIGHT': [{
             'key': 'RIGHT_EYE_CLOSE_THRESHOLD',
-            'title': 'Right Eye Close',
+            'title': 'Eye Close Offset',
             'describe': 'Close the eye when the openness is small than the threshold. Range(0, 1)',
             'range': [0, 1]
         }, {
             'key': 'RIGHT_EYE_OPEN_THRESHOLD',
-            'title': 'Right Eye Open',
+            'title': 'Eye Open Offset',
             'describe': 'Fully open the eye when the openness is larger than the threshold. Range(0, 1)',
             'range': [0, 1]
         }, {
             'key': 'RIGHT_EYE_SQUINT_RATIO',
-            'title': 'Right Eye Squint',
+            'title': 'Eye Ratio',
             'describe': 'The ratio of half-open eye between fully open and close. Range(0, 1)',
             'range': [0, 1]
         }],
         'EYE_LEFT': [{
             'key': 'LEFT_EYE_CLOSE_THRESHOLD',
-            'title': 'Left Eye Close',
+            'title': 'Eye Close Offset',
             'describe': 'Close the eye when the openness is small than the threshold. Range(0, 1)',
             'range': [0, 1]
         }, {
             'key': 'LEFT_EYE_OPEN_THRESHOLD',
-            'title': 'Left Eye Open',
+            'title': 'Eye Open Offset',
             'describe': 'Fully open the eye when the openness is larger than the threshold. Range(0, 1)',
             'range': [0, 1]
         }, {
             'key': 'LEFT_EYE_SQUINT_RATIO',
-            'title': 'Left Eye Squint',
+            'title': 'Eye Ratio',
             'describe': 'The ratio of half-open eye between fully open and close. Range(0, 1)',
             'range': [0, 1]
         }],
@@ -538,7 +538,7 @@ function getConfigModifiers() {
             'valid': availableTrackingMode
         }, {
             'key': 'HAND_STABLIZE_RATIO',
-            'title': 'Hand Stablize Ratio',
+            'title': 'Hand Smooth',
             'describe': 'Motion become more stable with larger value, but small gesture become harder to track. Avatar stop moving when the value is 1. Range(0, 0.95)',
             'range': [0, 0.95]
         }, {

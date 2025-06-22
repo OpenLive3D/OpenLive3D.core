@@ -109,8 +109,8 @@ function updateVRMMovement(keys) {
                 console.log("missing key:", key);
             }
         });
-        if (getCMV('TRACKING_MODE') == "Face-Only") {
-            setDefaultPose(currentVrm);
+        if (getCMV('TRACKING_MODE') != "Upper-Body") {
+            setPoseMode(currentVrm, getCMV('TRACKING_MODE'));
         }
     }
 }

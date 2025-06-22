@@ -1,15 +1,18 @@
 // layout
 let sidebar = document.getElementById("thesidebar");
 let moodbar = document.getElementById("themoodbar");
+let posebar = document.getElementById("theposebar");
 let systembox = document.getElementById("systembox");
 systembox.onclick = function() {
     console.log("click SYSTEM_IMG");
     if (sidebar.style.display == "none") {
         sidebar.style.display = "block";
         moodbar.style.display = "none";
+        posebar.style.display = "none";
     } else {
         sidebar.style.display = "none";
         moodbar.style.display = "block";
+        posebar.style.display = "block";
     }
     if (checkCameraPaused()) {
         playCapture();
@@ -711,6 +714,15 @@ function createMoodLayout() {
     tmp.innerHTML = ".";
     moodbar.appendChild(tmp);
 
+    // reset PoseLayout
+    posebar.innerHTML = "";
+    let tmp2 = document.createElement("div");
+    tmp2.className = "w3-bar-item";
+    tmp2.style.height = "10px";
+    tmp2.style.color = "#0000";
+    tmp2.innerHTML = ".";
+    posebar.appendChild(tmp2);
+
     // hand-on hand-no
     for (let i = 0; i < availableTrackingMode.length; i++) {
         let trackingmode = availableTrackingMode[i];
@@ -739,7 +751,7 @@ function createMoodLayout() {
         handdiv.appendChild(handobj);
         handdiv.appendChild(document.createElement("br"));
         handdiv.appendChild(document.createElement("br"));
-        moodbar.appendChild(handdiv);
+        posebar.appendChild(handdiv);
 
         if (i == availableTrackingMode.length - 1) {
             setTrackingModeSelect(getCMV("TRACKING_MODE"));

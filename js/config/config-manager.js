@@ -406,12 +406,12 @@ function getConfigModifiers() {
             'range': [0.1, 3]
         }, {
             'key': 'MOTION_BLUR_RATIO',
-            'title': 'Motion Blur Ratio',
+            'title': 'Motion Smooth',
             'describe': 'The higher this value is, the smoother the body motion is, default as 1.5. Range(0, 10).',
             'range': [0, 10]
         }, {
             'key': 'MOMENTUM_RATIO',
-            'title': 'Momentum Ratio',
+            'title': 'Momentum Smooth',
             'describe': 'The higher this value is, the smoother the body motion is, default as 1.5. Range(0, 10).',
             'range': [0, 10]
         }],

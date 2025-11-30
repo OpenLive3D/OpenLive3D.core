@@ -1,0 +1,442 @@
+/* Ghostkwebb Theme - Refined Clean Style */
+
+/* Global Font and Reset */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: #e0e0e0;
+}
+
+/* Sidebar - Clean Dark Mode */
+.w3-sidebar {
+    background-color: rgba(20, 20, 20, 0.95) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: none !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Main Settings Sidebar (#thesidebar) */
+#thesidebar {
+    top: 80px !important;
+    /* Position below the logo */
+    left: 20px !important;
+    bottom: auto !important;
+    transform: none !important;
+    /* Remove vertical centering */
+    height: auto !important;
+    max-height: calc(100vh - 100px);
+    /* Prevent overflow */
+    overflow-y: auto;
+    /* Scroll if needed */
+    border-radius: 20px;
+    background-color: rgba(25, 25, 25, 0.98) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 20px;
+    width: 360px !important;
+    z-index: 1000;
+}
+
+#thesidebar>.w3-bar-item:first-child,
+#themoodbar>.w3-bar-item:first-child,
+#theposebar>.w3-bar-item:first-child {
+    display: none !important;
+}
+
+/* Sidebar Items */
+.w3-bar-item {
+    transition: all 0.2s ease;
+}
+
+/* Floating Bars (Mood and Pose) */
+#themoodbar,
+#theposebar {
+    top: 80px !important;
+    bottom: auto !important;
+    transform: none !important;
+    height: auto !important;
+    max-height: calc(100vh - 100px);
+    border-radius: 24px;
+
+    width: 60px !important;
+    min-width: 60px !important;
+    max-width: 60px !important;
+    padding: 12px 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+
+    overflow-x: hidden;
+    background-color: rgba(30, 30, 30, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#themoodbar {
+    left: 20px !important;
+}
+
+#theposebar {
+    right: 20px !important;
+}
+
+/* Sidebar Items Spacing */
+/* Sidebar Items Spacing */
+/* Sidebar Items Spacing */
+#themoodbar>div,
+#theposebar>div {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-bottom: 16px !important;
+
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    transition: background-color 0.2s;
+    box-sizing: border-box !important;
+
+    display: grid !important;
+    place-items: center !important;
+    padding: 0 !important;
+    position: static !important;
+}
+
+/* Specific selector to override inline styles */
+#themoodbar>div>img,
+#theposebar>div>img,
+#themoodbar img,
+#theposebar img {
+    width: 28px !important;
+    height: 28px !important;
+
+    /* Reset Absolute positioning - Grid handles it better */
+    position: static !important;
+    transform: none !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    border: none !important;
+    object-fit: contain !important;
+}
+
+#themoodbar br,
+#theposebar br {
+    display: none !important;
+}
+
+/* Sidebar Animations */
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutLeft {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}
+
+.sidebar-open {
+    animation: slideInLeft 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
+}
+
+.sidebar-close {
+    animation: slideOutLeft 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
+}
+
+#themoodbar>div:hover,
+#theposebar>div:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    /* Slightly stronger highlight */
+}
+
+/* Buttons - Minimalist */
+.w3-button {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: #f0f0f0 !important;
+    border-radius: 10px;
+    margin: 6px 0;
+    padding: 10px 16px !important;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    border: 1px solid transparent;
+    text-align: left;
+}
+
+.w3-button:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff !important;
+    transform: translateX(4px);
+}
+
+.w3-button:active {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    transform: scale(0.98) translateX(4px);
+}
+
+#thesidebar>button.w3-button {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-left: 3px solid #007AFF;
+    /* Accent to mark as header */
+    margin-top: 12px;
+    margin-bottom: 4px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: #bbb !important;
+}
+
+#thesidebar>button.w3-button:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+    transform: translateX(2px);
+}
+
+/* Effect Keys and Config Keys (Dropdowns) - Clean Cards */
+div.effectkey,
+div.confkey {
+    background-color: rgba(40, 40, 40, 0.6) !important;
+    border-radius: 8px;
+    margin: 8px 0;
+    padding: 12px 16px;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 14px;
+}
+
+div.effectkey:hover,
+div.confkey:hover {
+    background-color: rgba(60, 60, 60, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Inputs - Sleek */
+input[type="text"],
+input[type="number"],
+select {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    color: #fff;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.2s, background-color 0.2s;
+    font-size: 13px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 6px;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus {
+    border-color: #007AFF;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Range Sliders - Refined */
+input[type=range] {
+    -webkit-appearance: none;
+    background: transparent;
+    width: 100%;
+    margin: 14px 0;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #007AFF;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -6px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    transition: transform 0.1s;
+    border: 2px solid #1a1a1a;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    background: #298dff;
+}
+
+/* Checkboxes */
+input[type="checkbox"] {
+    accent-color: #007AFF;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+/* System Box (Logo) - Slide Out Animation */
+div.systembox {
+    background: rgba(20, 20, 20, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 8px;
+    border-radius: 30px;
+    /* Pill shape */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    align-items: center;
+    width: 50px;
+    /* Initial width (logo only) */
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    /* Above sidebar */
+}
+
+div.systembox:hover {
+    width: 180px;
+    /* Expanded width */
+    background: rgba(40, 40, 40, 0.95);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+#systemimg {
+    height: 34px !important;
+    /* Slightly smaller */
+    width: 34px;
+    min-width: 34px;
+    transition: transform 0.4s ease;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+div.systembox:hover #systemimg {
+    transform: rotate(360deg);
+    /* Rotate on hover */
+}
+
+/* FIX: Logo Alignment - Perfect vertical centering */
+text.systemtext {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+    font-size: 16px;
+    margin-left: 12px;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all 0.3s ease 0.1s;
+    /* Delay slightly */
+    display: block;
+    /* Ensure block behavior for alignment */
+    line-height: 34px;
+    /* Match logo height */
+    height: 34px;
+    margin-top: 0;
+    padding-top: 2px;
+    /* Optical adjustment */
+}
+
+div.systembox:hover text.systemtext {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Tooltips - Clean */
+.w3-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.w3-text.w3-tag {
+    background-color: #1a1a1a !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    color: #eee;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Scrollbar - Minimal */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* Animations - Subtle */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.w3-bar-item {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Alert Box */
+div.alertbox {
+    background: rgba(200, 40, 40, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    bottom: 20px;
+    right: 20px;
+}
+
+text.alerttext {
+    background-color: transparent !important;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+}

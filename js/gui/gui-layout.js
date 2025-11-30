@@ -5,14 +5,31 @@ let posebar = document.getElementById("theposebar");
 let systembox = document.getElementById("systembox");
 systembox.onclick = function() {
     console.log("click SYSTEM_IMG");
-    if (sidebar.style.display == "none") {
+    if (sidebar.style.display == "none" || sidebar.classList.contains('sidebar-close')) {
+        // Open Sidebar
         sidebar.style.display = "block";
+        sidebar.classList.remove('sidebar-close');
+        sidebar.classList.add('sidebar-open');
+
+        // Hide other bars
         moodbar.style.display = "none";
         posebar.style.display = "none";
     } else {
-        sidebar.style.display = "none";
-        moodbar.style.display = "block";
-        posebar.style.display = "block";
+        // Close Sidebar with Animation
+        sidebar.classList.remove('sidebar-open');
+        sidebar.classList.add('sidebar-close');
+
+        // Wait for animation to finish before hiding
+        setTimeout(() => {
+            if (sidebar.classList.contains('sidebar-close')) {
+                sidebar.style.display = "none";
+                sidebar.classList.remove('sidebar-close');
+
+                // Show other bars
+                moodbar.style.display = "block";
+                posebar.style.display = "block";
+            }
+        }, 300); // Match animation duration
     }
     if (checkCameraPaused()) {
         playCapture();
@@ -222,6 +239,7 @@ function updateMusicList() {
 }
 
 function createLayout() {
+    updateTheme();
     setBackGround();
 
     // vrm loading button
@@ -570,6 +588,8 @@ function createLayout() {
                         createLayout();
                     } else if (configitem['key'] == "TRACKING_MODE") {
                         setTrackingModeSelect(itemselect.value);
+                    } else if (configitem['key'] == "UI_THEME") {
+                        updateTheme();
                     }
                 };
                 confgroup.appendChild(itemselect);
@@ -736,7 +756,7 @@ function createMoodLayout() {
         handobj.src = "asset/hand/" + trackingmode + "-2.png";
         handobj.style.width = "30px";
         handobj.style.cursor = "pointer";
-        handobj.style.marginLeft = "12px";
+        // handobj.style.marginLeft = "12px"; // REMOVED: Causes alignment issues
         handobj.onclick = function() {
             if (getCMV("IN_TRACKING_MODE_SELECT") ||
                 !getCMV("UI_TRACKING_MODE_COLLAPSE")) {
@@ -749,8 +769,8 @@ function createMoodLayout() {
             }
         }
         handdiv.appendChild(handobj);
-        handdiv.appendChild(document.createElement("br"));
-        handdiv.appendChild(document.createElement("br"));
+        // handdiv.appendChild(document.createElement("br")); // REMOVED: Causes layout issues
+        // handdiv.appendChild(document.createElement("br")); // REMOVED: Causes layout issues
         posebar.appendChild(handdiv);
 
         if (i == availableTrackingMode.length - 1) {
@@ -773,7 +793,7 @@ function createMoodLayout() {
             moodobj.src = "asset/mood/" + mood + ".png";
             moodobj.style.width = "30px";
             moodobj.style.cursor = "pointer";
-            moodobj.style.marginLeft = "12px";
+            // moodobj.style.marginLeft = "12px"; // REMOVED: Causes alignment issues
             moodobj.onclick = function() {
                 if (getCMV("IN_MOOD_SELECT") ||
                     !getCMV("UI_MOOD_COLLAPSE")) {
@@ -786,8 +806,8 @@ function createMoodLayout() {
                 }
             }
             mooddiv.appendChild(moodobj);
-            mooddiv.appendChild(document.createElement("br"));
-            mooddiv.appendChild(document.createElement("br"));
+            // mooddiv.appendChild(document.createElement("br")); // REMOVED: Causes layout issues
+            // mooddiv.appendChild(document.createElement("br")); // REMOVED: Causes layout issues
             moodbar.appendChild(mooddiv);
         }
 
@@ -1109,5 +1129,17 @@ function displayObj(target) {
         obj.style.display = "block";
     } else {
         obj.style.display = "none";
+    }
+}
+
+function updateTheme() {
+    let theme = getCMV("UI_THEME");
+    let ghostkwebbTheme = document.getElementById("theme-ghostkwebb");
+    if (ghostkwebbTheme) {
+        if (theme === "Ghostkwebb") {
+            ghostkwebbTheme.disabled = false;
+        } else {
+            ghostkwebbTheme.disabled = true;
+        }
     }
 }

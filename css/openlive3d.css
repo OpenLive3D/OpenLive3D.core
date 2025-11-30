@@ -4,6 +4,7 @@ canvas.vrm {
     left: 0%;
     z-index: -1;
 }
+
 div.bgimg {
     position: absolute;
     background-size: cover;
@@ -13,12 +14,14 @@ div.bgimg {
     height: 100%;
     z-index: -3;
 }
+
 div.systembox {
     position: absolute;
     top: 5px;
     left: 7px;
     z-index: 3;
 }
+
 div.alertbox {
     position: absolute;
     bottom: 7px;
@@ -26,6 +29,7 @@ div.alertbox {
     z-index: 4;
     display: none;
 }
+
 div.loadbox {
     position: absolute;
     top: 0px;
@@ -35,12 +39,14 @@ div.loadbox {
     z-index: 5;
     background-color: #ffff;
 }
+
 div.webcambox {
     position: absolute;
     top: 0px;
     left: 0px;
     z-index: -5;
 }
+
 div.effectkey {
     color: #fff;
     cursor: pointer;
@@ -48,6 +54,7 @@ div.effectkey {
     background-color: #000a;
     padding-left: 16px;
 }
+
 div.confkey {
     color: #fff;
     cursor: pointer;
@@ -55,6 +62,7 @@ div.confkey {
     background-color: #000a;
     padding-left: 16px;
 }
+
 text.systemtext {
     color: #FFFFFF00;
     position: absolute;
@@ -65,6 +73,7 @@ text.systemtext {
     cursor: pointer;
     user-select: none;
 }
+
 text.alerttext {
     color: #FFFFFFFF;
     background-color: #00000088;
@@ -77,6 +86,7 @@ text.alerttext {
     font-size: 16px;
     user-select: none;
 }
+
 text.loading {
     position: absolute;
     top: 5px;
@@ -85,6 +95,7 @@ text.loading {
     font-size: 28px;
     user-select: none;
 }
+
 span {
     position: absolute;
     left: -10px;
@@ -93,11 +104,13 @@ span {
     width: 250px;
     z-index: 6;
 }
+
 div.vrm {
     position: absolute;
     top: 0%;
     left: 0%;
 }
+
 canvas.backgroundeffect {
     position: absolute;
     top: 0%;
@@ -105,10 +118,21 @@ canvas.backgroundeffect {
     z-index: -2;
     pointer-events: none;
 }
+
 canvas.foregroundeffect {
     position: absolute;
     top: 0%;
     left: 0%;
     z-index: 1;
     pointer-events: none;
+}
+
+#themoodbar>div,
+#theposebar>div {
+    margin-bottom: 20px;
+}
+
+#themoodbar img,
+#theposebar img {
+    margin-left: 12px;
 }

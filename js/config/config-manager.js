@@ -111,7 +111,8 @@ let defaultConfig = {
     'IN_MOOD_SELECT': false,
     'IN_TRACKING_MODE_SELECT': false,
     'TEST_MOBILE_ENTRY': false,
-    'TEST_SAFARI_ENTRY': false
+    'TEST_SAFARI_ENTRY': false,
+    'UI_THEME': "OpenLive3D"
 };
 
 function getDefaultCMV(key) {
@@ -330,7 +331,7 @@ function getBinaryCM() {
 }
 
 function getSelectCM() {
-    return ['LANGUAGE', 'TRACKING_MODE'];
+    return ['LANGUAGE', 'TRACKING_MODE', 'UI_THEME'];
 }
 
 function getSideBoxes() {
@@ -574,6 +575,11 @@ function getConfigModifiers() {
             'range': [-1, 1]
         }],
         'UI': [{
+            'key': 'UI_THEME',
+            'title': 'UI Theme',
+            'describe': 'Select the UI theme.',
+            'valid': ["OpenLive3D", "Ghostkwebb"]
+        }, {
             'key': 'UI_TRACKING_MODE_COLLAPSE',
             'title': 'Collapse Tracking Mode UI',
             'describe': 'Change the UI selection framework format',

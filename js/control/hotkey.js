@@ -10,6 +10,11 @@ function setMoodWithHotkey(moodId) {
 }
 
 function userInputKey(e) {
+  // Prevent hotkeys if user is typing in an input field
+  if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+    return;
+  }
+
   let key = String.fromCharCode(e.which);
   switch (key) {
     case 'H':

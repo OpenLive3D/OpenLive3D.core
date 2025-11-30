@@ -58,6 +58,8 @@ let defaultConfig = {
     'POSITION_Z_RATIO': 0.12,
     'UI_TRACKING_MODE_COLLAPSE': false,
     'UI_MOOD_COLLAPSE': false,
+    'USE_IFACIALMOCAP': false,
+    'IFACIALMOCAP_IP': "192.168.1.x",
     // system parameters
     'VERSION': VERSION,
     'DEV_DATE': DEV_DATE,
@@ -327,7 +329,7 @@ function getBinaryCM() {
         'MOOD_FUN', 'MOOD_JOY',
         'MOOD_NEUTRAL', 'MOOD_AUTO', 'MULTI_THREAD',
         'UI_TRACKING_MODE_COLLAPSE', 'UI_MOOD_COLLAPSE',
-        'POSITION_TRACKING'];
+        'POSITION_TRACKING', 'USE_IFACIALMOCAP'];
 }
 
 function getSelectCM() {

@@ -11,30 +11,42 @@ let lasTimeDiff = 30;
 
 function weightedAvg(o1, o2, w1, w2) {
     let obj = {};
-    Object.keys(o1).forEach(function(key) {
-        obj[key] = o1[key] + (o2[key] - o1[key]) * w1 / (w1 + w2);
+    Object.keys(o1).forEach(function (key) {
+        let v1 = o1[key] || 0;
+        let v2 = o2[key] || 0;
+        if (isNaN(v1)) v1 = 0;
+        if (isNaN(v2)) v2 = 0;
+        obj[key] = v1 + (v2 - v1) * w1 / (w1 + w2);
     });
     return obj;
 }
 
 function calInfoDiff(o1, o2) {
     let obj = {};
-    Object.keys(o1).forEach(function(key) {
-        obj[key] = o2[key] - o1[key];
+    Object.keys(o1).forEach(function (key) {
+        let v1 = o1[key] || 0;
+        let v2 = o2[key] || 0;
+        if (isNaN(v1)) v1 = 0;
+        if (isNaN(v2)) v2 = 0;
+        obj[key] = v2 - v1;
     });
     return obj;
 }
 
 function calScaleDiff(o1, w1) {
-    Object.keys(o1).forEach(function(key) {
+    Object.keys(o1).forEach(function (key) {
         o1[key] *= w1;
     });
 }
 
 function sumInfoDiff(o1, o2) {
     let obj = {};
-    Object.keys(o1).forEach(function(key) {
-        obj[key] = o2[key] + o1[key];
+    Object.keys(o1).forEach(function (key) {
+        let v1 = o1[key] || 0;
+        let v2 = o2[key] || 0;
+        if (isNaN(v1)) v1 = 0;
+        if (isNaN(v2)) v2 = 0;
+        obj[key] = v2 + v1;
     });
     return obj;
 }

@@ -138,7 +138,7 @@ window.applyIFacialMocapData = function (data) {
     // --- Head Rotation ---
     const toRad = Math.PI / 180;
 
-    if (data.headPitch !== undefined && !isNaN(data.headPitch)) tmpInfo['pitch'] = data.headPitch * toRad;
+    if (data.headPitch !== undefined && !isNaN(data.headPitch)) tmpInfo['pitch'] = -data.headPitch * toRad;
     if (data.headYaw !== undefined && !isNaN(data.headYaw)) tmpInfo['yaw'] = data.headYaw * toRad;
     if (data.headRoll !== undefined && !isNaN(data.headRoll)) tmpInfo['roll'] = data.headRoll * toRad;
 
@@ -167,16 +167,21 @@ window.applyIFacialMocapData = function (data) {
 
     // --- Mouth ---
     const AMP = 1.0;
-    const MOUTH_CLOSE_THRESHOLD = 0.05;
+    // Workaround for "resting gap": Subtract the threshold instead of just gating it.
+    // This creates a smooth transition from 0 starting at the threshold.
+    const MOUTH_OFFSET = 0.2;
 
-    let jawVal = getVal('jawOpen');
-    if (jawVal < MOUTH_CLOSE_THRESHOLD) jawVal = 0;
+    const applyOffset = (v) => Math.max(0, v - MOUTH_OFFSET) * (1 / (1 - MOUTH_OFFSET));
 
+    let jawVal = applyOffset(getVal('jawOpen'));
     tmpInfo['mouth'] = Math.min(1, jawVal * AMP);
-    tmpInfo['mouthFunnel'] = Math.min(1, getVal('mouthFunnel') * AMP);
-    tmpInfo['mouthPucker'] = Math.min(1, getVal('mouthPucker') * AMP);
 
-    tmpInfo['mouthStretch'] = Math.min(1, (getVal('mouthStretch_L') * 0.5 + getVal('mouthStretch_R') * 0.5));
+    // Apply to other shapes
+    tmpInfo['mouthFunnel'] = Math.min(1, applyOffset(getVal('mouthFunnel')) * AMP);
+    tmpInfo['mouthPucker'] = Math.min(1, applyOffset(getVal('mouthPucker')) * AMP);
+
+    // Stretch might need less offset, but let's keep it consistent for now
+    tmpInfo['mouthStretch'] = Math.min(1, applyOffset((getVal('mouthStretch_L') * 0.5 + getVal('mouthStretch_R') * 0.5)));
 
     tmpInfo['mouthSmile'] = Math.min(1, (getVal('mouthSmile_L') * 0.5 + getVal('mouthSmile_R') * 0.5) * 1.2);
 

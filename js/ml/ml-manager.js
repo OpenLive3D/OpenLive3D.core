@@ -283,21 +283,29 @@ function extractMouthEyes(keys) {
     if (keys['mouthPucker'] !== undefined) meinfo['b']['ou'] = keys['mouthPucker']; // U
     if (keys['mouthStretch'] !== undefined) meinfo['b']['ih'] = keys['mouthStretch']; // I / E
 
+    // --- Extended Shapes & Mood Logic ---
+    // Only apply these detailed expressions if we are in 'auto' mood or using iFacialMocap (which usually overrides mood).
+    // Reviewer concern: If mood is 'fun', these might conflict. 
+    // However, for iFacialMocap, we typically WANT exact tracking. 
+    // But to be safe and follow the 'MOOD != fun' pattern:
+    const allowTracking = getCMV("MOOD") === "auto" || getCMV("MOOD") === "neutral";
+
     // Frown -> Sorrow/Sad
-    if (keys['mouthFrown'] !== undefined) {
+    if (allowTracking && keys['mouthFrown'] !== undefined) {
+        let frownVal = keys['mouthFrown'] > 0.1 ? keys['mouthFrown'] : 0;
         // Mix with existing sad if any
         let currentSad = meinfo['b']['sad'] || 0;
-        meinfo['b']['sad'] = Math.max(currentSad, keys['mouthFrown']);
+        meinfo['b']['sad'] = Math.max(currentSad, frownVal);
     }
 
-    // Tongue (if model supports 'tongue')
-    if (keys['tongueOut'] !== undefined && keys['tongueOut'] > 0.1) {
-        meinfo['b']['tongue'] = keys['tongueOut'];
+    // Tongue
+    if (keys['tongueOut'] !== undefined) {
+        meinfo['b']['tongue'] = keys['tongueOut'] > 0.1 ? keys['tongueOut'] : 0;
     }
 
-    // Cheek Puff (if model supports 'puff')
-    if (keys['cheekPuff'] !== undefined && keys['cheekPuff'] > 0.1) {
-        meinfo['b']['puff'] = keys['cheekPuff'];
+    // Cheek Puff
+    if (keys['cheekPuff'] !== undefined) {
+        meinfo['b']['puff'] = keys['cheekPuff'] > 0.1 ? keys['cheekPuff'] : 0;
     }
 
     // --- Brows ---
@@ -307,7 +315,7 @@ function extractMouthEyes(keys) {
     let browspos = Math.min(1, Math.max(0, Math.max(browInner, browOuter) - getCMV("BROWS_OFFSET")) * getCMV("BROWS_RATIO"));
     meinfo['b']['Brows up'] = browspos;
 
-    if (keys['browDown'] !== undefined) {
+    if (allowTracking && keys['browDown'] !== undefined) {
         meinfo['b']['angry'] = keys['browDown'];
     }
 
@@ -330,18 +338,14 @@ function extractMouthEyes(keys) {
     meinfo['r']['leftEye'] = [irisX, irisY, 0];
 
     // --- Auto Mood / Smile ---
-    if (keys['mouthSmile'] !== undefined && keys['mouthSmile'] > 0.1) {
-        meinfo['b']['happy'] = keys['mouthSmile'];
+    if (allowTracking && keys['mouthSmile'] !== undefined) {
+        meinfo['b']['happy'] = keys['mouthSmile'] > 0.1 ? keys['mouthSmile'] : 0;
     }
 
-    // Keep existing Auto Mood logic as fallback or mixer? 
-    // If iFacialMocap is active, we might want to override.
-    // But for safety, let's keep the original logic ONLY if iFacialMocap keys are missing.
+    // Keep existing Auto Mood logic as fallback
     if (getCMV("MOOD") == "auto" && keys['mouthSmile'] === undefined) {
-        // ... original auto logic ...
         let autoV = Math.max(-1, Math.min(1, keys["auto"] * getCMV("MOOD_AUTO_RATIO")));
         let absauto = Math.max(0, Math.abs(autoV) - getCMV("MOOD_AUTO_OFFSET"));
-        // ... (simplified for brevity, assuming we rely on direct mapping now)
         if (autoV < 0) {
             meinfo['b']['angry'] = Math.max(meinfo['b']['angry'] || 0, absauto); // Mix
         } else {

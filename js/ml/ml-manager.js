@@ -113,7 +113,7 @@ async function onHolisticResults(results) {
 
     postCoreLog(allLog);
     postPoI(allPoI);
-    if (results.faceLandmarks || getCMV('USE_IFACIALMOCAP')) {
+    if (results.faceLandmarks && !getCMV('USE_IFACIALMOCAP')) {
         pushInfo(tmpInfo);
     }
 }

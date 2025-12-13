@@ -276,7 +276,9 @@ function extractMouthEyes(keys) {
         // Webcam data needs scaling
         mouthRatio = ratioLimit((keys['mouth'] - getCMV("MOUTH_OPEN_OFFSET")) * getCMV('MOUTH_RATIO'));
     }
-    meinfo['b']['aa'] = mouthRatio;
+    if (allowTracking) {
+        meinfo['b']['aa'] = mouthRatio;
+    }
 
     // Extended Shapes (if available from iFacialMocap)
     if (keys['mouthFunnel'] !== undefined) meinfo['b']['oh'] = keys['mouthFunnel']; // O
@@ -284,11 +286,10 @@ function extractMouthEyes(keys) {
     if (keys['mouthStretch'] !== undefined) meinfo['b']['ih'] = keys['mouthStretch']; // I / E
 
     // --- Extended Shapes & Mood Logic ---
-    // Only apply these detailed expressions if we are in 'auto' mood or using iFacialMocap (which usually overrides mood).
-    // Reviewer concern: If mood is 'fun', these might conflict. 
-    // However, for iFacialMocap, we typically WANT exact tracking. 
-    // But to be safe and follow the 'MOOD != fun' pattern:
-    const allowTracking = getCMV("MOOD") === "auto" || getCMV("MOOD") === "neutral";
+    // Reviewer feedback: "Fun" mood should NOT have its mouth/eye tracking overridden.
+    // Logic: If mood is default/auto/angry/sad -> Allow Tracking.
+    // If mood is "Fun" -> Disable Tracking (keep static fun expression).
+    const allowTracking = getCMV("MOOD") !== "fun";
 
     // Frown -> Sorrow/Sad
     if (allowTracking && keys['mouthFrown'] !== undefined) {
@@ -368,22 +369,29 @@ function extractMouthEyes(keys) {
     }
 
     // Right Eye
-    if (reo < getCMV('RIGHT_EYE_CLOSE_THRESHOLD')) {
-        meinfo['b']['blinkRight'] = happyThresholdForEyes;
-    } else if (reo < getCMV('RIGHT_EYE_OPEN_THRESHOLD')) {
-        let eRatio = (reo - getCMV('RIGHT_EYE_CLOSE_THRESHOLD')) / (getCMV('RIGHT_EYE_OPEN_THRESHOLD') - getCMV('RIGHT_EYE_CLOSE_THRESHOLD'));
-        meinfo['b']['blinkRight'] = ratioLimit((happyThresholdForEyes - eRatio) * getCMV('RIGHT_EYE_SQUINT_RATIO'));
-    } else {
-        meinfo['b']['blinkRight'] = 0;
-    }
+    if (allowTracking) {
+        if (reo < getCMV('RIGHT_EYE_CLOSE_THRESHOLD')) {
+            meinfo['b']['blinkRight'] = happyThresholdForEyes;
+        } else if (reo < getCMV('RIGHT_EYE_OPEN_THRESHOLD')) {
+            let eRatio = (reo - getCMV('RIGHT_EYE_CLOSE_THRESHOLD')) / (getCMV('RIGHT_EYE_OPEN_THRESHOLD') - getCMV('RIGHT_EYE_CLOSE_THRESHOLD'));
+            meinfo['b']['blinkRight'] = ratioLimit((happyThresholdForEyes - eRatio) * getCMV('RIGHT_EYE_SQUINT_RATIO'));
+        } else {
+            meinfo['b']['blinkRight'] = 0;
+        }
 
-    // Left Eye
-    if (leo < getCMV('LEFT_EYE_CLOSE_THRESHOLD')) {
-        meinfo['b']['blinkLeft'] = happyThresholdForEyes;
-    } else if (leo < getCMV('LEFT_EYE_OPEN_THRESHOLD')) {
-        let eRatio = (leo - getCMV('LEFT_EYE_CLOSE_THRESHOLD')) / (getCMV('LEFT_EYE_OPEN_THRESHOLD') - getCMV('LEFT_EYE_CLOSE_THRESHOLD'));
-        meinfo['b']['blinkLeft'] = ratioLimit((happyThresholdForEyes - eRatio) * getCMV('LEFT_EYE_SQUINT_RATIO'));
+        // Left Eye
+        if (leo < getCMV('LEFT_EYE_CLOSE_THRESHOLD')) {
+            meinfo['b']['blinkLeft'] = happyThresholdForEyes;
+        } else if (leo < getCMV('LEFT_EYE_OPEN_THRESHOLD')) {
+            let eRatio = (leo - getCMV('LEFT_EYE_CLOSE_THRESHOLD')) / (getCMV('LEFT_EYE_OPEN_THRESHOLD') - getCMV('LEFT_EYE_CLOSE_THRESHOLD'));
+            meinfo['b']['blinkLeft'] = ratioLimit((happyThresholdForEyes - eRatio) * getCMV('LEFT_EYE_SQUINT_RATIO'));
+        } else {
+            meinfo['b']['blinkLeft'] = 0;
+        }
     } else {
+        // Force eyes open (0) if tracking is disabled (e.g. Fun mood takes over),
+        // or let them stay at default. Usually 0 is safe to avoid conflict.
+        meinfo['b']['blinkRight'] = 0;
         meinfo['b']['blinkLeft'] = 0;
     }
 

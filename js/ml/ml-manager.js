@@ -299,12 +299,12 @@ function extractMouthEyes(keys) {
     }
 
     // Tongue
-    if (keys['tongueOut'] !== undefined) {
+    if (allowTracking && keys['tongueOut'] !== undefined) {
         meinfo['b']['tongue'] = keys['tongueOut'] > 0.1 ? keys['tongueOut'] : 0;
     }
 
     // Cheek Puff
-    if (keys['cheekPuff'] !== undefined) {
+    if (allowTracking && keys['cheekPuff'] !== undefined) {
         meinfo['b']['puff'] = keys['cheekPuff'] > 0.1 ? keys['cheekPuff'] : 0;
     }
 

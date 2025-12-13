@@ -126,6 +126,9 @@ window.applyIFacialMocapData = function (data) {
 
     if (!useMocap) return;
 
+    // --- Extended Shapes & Mood Logic ---
+    const allowTracking = getCMV("MOOD") !== "fun";
+
     // Helper to get value (0-100 -> 0-1) with safety
     const getVal = (key) => {
         if (data[key] !== undefined) {
@@ -145,66 +148,69 @@ window.applyIFacialMocapData = function (data) {
     // Optional: Head Position (scaled)
     // if (data.headX !== undefined && !isNaN(data.headX)) tmpInfo['x'] = data.headX * 0.5; // Scale TBD
 
-    // --- Eyes ---
-    const smooth = 0.5;
-    const applySmooth = (key, targetVal) => {
+    // --- Smoothing Helper ---
+    // Smooth factor: 0.0 = no move, 1.0 = instant move.
+    // Lower = smoother but more latency. 0.5 is a good balance.
+    const SMOOTH_FACTOR = 0.5;
+    const MOUTH_SMOOTH = 0.8; // Faster response for speech
+
+    const applySmoothVal = (key, targetVal, factor = SMOOTH_FACTOR) => {
         let oldVal = tmpInfo[key] || 0;
-        tmpInfo[key] = oldVal * smooth + targetVal * (1 - smooth);
+        let newVal = oldVal * (1 - factor) + targetVal * factor;
+        tmpInfo[key] = newVal;
     };
 
-    applySmooth('leftEyeOpen', 1 - getVal('eyeBlink_L'));
-    applySmooth('rightEyeOpen', 1 - getVal('eyeBlink_R'));
+    applySmoothVal('leftEyeOpen', 1 - getVal('eyeBlink_L'));
+    applySmoothVal('rightEyeOpen', 1 - getVal('eyeBlink_R'));
 
     // Iris X (Yaw)
     let irisX = (getVal('eyeLookIn_L') + getVal('eyeLookOut_R')) - (getVal('eyeLookOut_L') + getVal('eyeLookIn_R'));
     let targetIrisX = isNaN(irisX) ? 0 : irisX * 0.2;
-    applySmooth('irisPos', targetIrisX);
+    applySmoothVal('irisPos', targetIrisX);
 
     // Iris Y (Pitch)
     let irisY = (getVal('eyeLookUp_L') + getVal('eyeLookUp_R')) - (getVal('eyeLookDown_L') + getVal('eyeLookDown_R'));
     let targetIrisY = isNaN(irisY) ? 0 : irisY * 0.2;
-    applySmooth('irisYPos', targetIrisY);
+    applySmoothVal('irisYPos', targetIrisY);
 
     // --- Mouth ---
     const AMP = 1.0;
-    // Workaround for "resting gap": Subtract the threshold instead of just gating it.
-    // This creates a smooth transition from 0 starting at the threshold.
-    const MOUTH_OFFSET = 0.2;
-
+    const MOUTH_OFFSET = 0.1;
     const applyOffset = (v) => Math.max(0, v - MOUTH_OFFSET) * (1 / (1 - MOUTH_OFFSET));
 
     let jawVal = applyOffset(getVal('jawOpen'));
-    tmpInfo['mouth'] = Math.min(1, jawVal * AMP);
+    applySmoothVal('mouth', Math.min(1, jawVal * AMP), MOUTH_SMOOTH);
 
     // Apply to other shapes
-    tmpInfo['mouthFunnel'] = Math.min(1, applyOffset(getVal('mouthFunnel')) * AMP);
-    tmpInfo['mouthPucker'] = Math.min(1, applyOffset(getVal('mouthPucker')) * AMP);
+    applySmoothVal('mouthFunnel', Math.min(1, applyOffset(getVal('mouthFunnel')) * AMP), MOUTH_SMOOTH);
+    applySmoothVal('mouthPucker', Math.min(1, applyOffset(getVal('mouthPucker')) * AMP), MOUTH_SMOOTH);
 
-    // Stretch might need less offset, but let's keep it consistent for now
-    tmpInfo['mouthStretch'] = Math.min(1, applyOffset((getVal('mouthStretch_L') * 0.5 + getVal('mouthStretch_R') * 0.5)));
+    // Stretch
+    let stretchVal = Math.min(1, applyOffset((getVal('mouthStretch_L') * 0.5 + getVal('mouthStretch_R') * 0.5)));
+    applySmoothVal('mouthStretch', stretchVal, MOUTH_SMOOTH);
 
-    tmpInfo['mouthSmile'] = Math.min(1, (getVal('mouthSmile_L') * 0.5 + getVal('mouthSmile_R') * 0.5) * 1.2);
+    applySmoothVal('mouthSmile', Math.min(1, (getVal('mouthSmile_L') * 0.5 + getVal('mouthSmile_R') * 0.5) * 1.2), MOUTH_SMOOTH);
 
     // New Mouth Shapes
-    tmpInfo['mouthFrown'] = Math.min(1, (getVal('mouthFrown_L') + getVal('mouthFrown_R')) * 0.5 * AMP);
-    tmpInfo['mouthDimple'] = Math.min(1, (getVal('mouthDimple_L') + getVal('mouthDimple_R')) * 0.5 * AMP);
-    tmpInfo['mouthPress'] = Math.min(1, (getVal('mouthPress_L') + getVal('mouthPress_R')) * 0.5 * AMP);
-    tmpInfo['mouthShrug'] = Math.min(1, (getVal('mouthShrugLower') + getVal('mouthShrugUpper')) * 0.5 * AMP);
-    tmpInfo['mouthRoll'] = Math.min(1, (getVal('mouthRollLower') + getVal('mouthRollUpper')) * 0.5 * AMP);
+    applySmoothVal('mouthFrown', Math.min(1, (getVal('mouthFrown_L') + getVal('mouthFrown_R')) * 0.5 * AMP), MOUTH_SMOOTH);
+    applySmoothVal('mouthDimple', Math.min(1, (getVal('mouthDimple_L') + getVal('mouthDimple_R')) * 0.5 * AMP), MOUTH_SMOOTH);
+    applySmoothVal('mouthPress', Math.min(1, (getVal('mouthPress_L') + getVal('mouthPress_R')) * 0.5 * AMP), MOUTH_SMOOTH);
+    applySmoothVal('mouthShrug', Math.min(1, (getVal('mouthShrugLower') + getVal('mouthShrugUpper')) * 0.5 * AMP), MOUTH_SMOOTH);
+    applySmoothVal('mouthRoll', Math.min(1, (getVal('mouthRollLower') + getVal('mouthRollUpper')) * 0.5 * AMP), MOUTH_SMOOTH);
 
     // Tongue
-    tmpInfo['tongueOut'] = getVal('tongueOut');
+    applySmoothVal('tongueOut', getVal('tongueOut'), MOUTH_SMOOTH);
 
     // --- Brows ---
     const BROW_AMP = 2.5;
 
-    tmpInfo['brows'] = Math.min(1, getVal('browInnerUp') * BROW_AMP);
-    tmpInfo['browOuterUp'] = Math.min(1, (getVal('browOuterUp_L') + getVal('browOuterUp_R')) * 0.5 * BROW_AMP);
-    tmpInfo['browDown'] = Math.min(1, (getVal('browDown_L') + getVal('browDown_R')) * 0.5 * BROW_AMP);
+    applySmoothVal('brows', Math.min(1, getVal('browInnerUp') * BROW_AMP));
+    applySmoothVal('browOuterUp', Math.min(1, (getVal('browOuterUp_L') + getVal('browOuterUp_R')) * 0.5 * BROW_AMP));
+    applySmoothVal('browDown', Math.min(1, (getVal('browDown_L') + getVal('browDown_R')) * 0.5 * BROW_AMP));
 
     // --- Cheeks ---
-    tmpInfo['cheekPuff'] = getVal('cheekPuff');
-    tmpInfo['cheekSquint'] = (getVal('cheekSquint_L') + getVal('cheekSquint_R')) * 0.5;
+    applySmoothVal('cheekPuff', getVal('cheekPuff'));
+    applySmoothVal('cheekSquint', (getVal('cheekSquint_L') + getVal('cheekSquint_R')) * 0.5);
 
     // Force update
     pushInfo(tmpInfo);
@@ -266,6 +272,9 @@ function extractMouthEyes(keys) {
         'e': {}
     };
 
+    // --- Extended Shapes & Mood Logic ---
+    const allowTracking = getCMV("MOOD") !== "fun";
+
     // --- Mouth ---
     // Basic Open (A)
     let mouthRatio;
@@ -285,14 +294,8 @@ function extractMouthEyes(keys) {
     if (keys['mouthPucker'] !== undefined) meinfo['b']['ou'] = keys['mouthPucker']; // U
     if (keys['mouthStretch'] !== undefined) meinfo['b']['ih'] = keys['mouthStretch']; // I / E
 
-    // --- Extended Shapes & Mood Logic ---
-    // Reviewer feedback: "Fun" mood should NOT have its mouth/eye tracking overridden.
-    // Logic: If mood is default/auto/angry/sad -> Allow Tracking.
-    // If mood is "Fun" -> Disable Tracking (keep static fun expression).
-    const allowTracking = getCMV("MOOD") !== "fun";
-
     // Frown -> Sorrow/Sad
-    if (allowTracking && keys['mouthFrown'] !== undefined) {
+    if (allowTracking && keys['mouthFrown'] !== undefined && getCMV("MOOD") !== "sorrow") {
         let frownVal = keys['mouthFrown'] > 0.1 ? keys['mouthFrown'] : 0;
         // Mix with existing sad if any
         let currentSad = meinfo['b']['sad'] || 0;
@@ -316,8 +319,8 @@ function extractMouthEyes(keys) {
     let browspos = Math.min(1, Math.max(0, Math.max(browInner, browOuter) - getCMV("BROWS_OFFSET")) * getCMV("BROWS_RATIO"));
     meinfo['b']['Brows up'] = browspos;
 
-    if (allowTracking && keys['browDown'] !== undefined) {
-        meinfo['b']['angry'] = keys['browDown'];
+    if (allowTracking && keys['browDown'] !== undefined && getCMV("MOOD") !== "angry") {
+        meinfo['b']['angry'] = keys['browDown'] > 0.1 ? keys['browDown'] : 0;
     }
 
     // --- Iris Rotation ---

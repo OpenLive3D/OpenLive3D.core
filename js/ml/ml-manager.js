@@ -78,14 +78,12 @@ async function onHolisticResults(results) {
 
     let allPoI = {};
     let allLog = {};
-    if (results.faceLandmarks) {
-        if (!getCMV('USE_IFACIALMOCAP')) {
-            let keyPoints = packFaceHolistic(results.faceLandmarks);
-            mergePoints(allPoI, keyPoints);
-            let faceInfo = face2Info(keyPoints);
-            allLog["face"] = faceInfo;
-            onFaceLandmarkResult(keyPoints, faceInfo);
-        }
+    if (results.faceLandmarks && !getCMV('USE_IFACIALMOCAP')) {
+        let keyPoints = packFaceHolistic(results.faceLandmarks);
+        mergePoints(allPoI, keyPoints);
+        let faceInfo = face2Info(keyPoints);
+        allLog["face"] = faceInfo;
+        onFaceLandmarkResult(keyPoints, faceInfo);
     }
     if (results.poseLandmarks) {
         let keyPoints = packPoseHolistic(results.poseLandmarks);

@@ -78,7 +78,7 @@ async function onHolisticResults(results) {
 
     let allPoI = {};
     let allLog = {};
-    if (results.faceLandmarks) {
+    if (results.faceLandmarks && !getCMV('USE_IFACIALMOCAP')) {
         let keyPoints = packFaceHolistic(results.faceLandmarks);
         mergePoints(allPoI, keyPoints);
         let faceInfo = face2Info(keyPoints);
@@ -113,9 +113,105 @@ async function onHolisticResults(results) {
 
     postCoreLog(allLog);
     postPoI(allPoI);
-    if (results.faceLandmarks) {
+    if (results.faceLandmarks && !getCMV('USE_IFACIALMOCAP')) {
         pushInfo(tmpInfo);
     }
+}
+
+window.applyIFacialMocapData = function(data) {
+    let useMocap = getCMV('USE_IFACIALMOCAP');
+    if (useMocap === undefined) useMocap = true;
+
+    if (!useMocap) return;
+
+    // --- Extended Shapes & Mood Logic ---
+    const allowTracking = getCMV("MOOD") !== "fun";
+
+    // Helper to get value (0-100 -> 0-1) with safety
+    const getVal = (key) => {
+        if (data[key] !== undefined) {
+            let v = data[key] / 100.0;
+            return isNaN(v) ? 0 : v;
+        }
+        return 0;
+    };
+
+    // --- Head Rotation ---
+    const toRad = Math.PI / 180;
+
+    if (data.headPitch !== undefined && !isNaN(data.headPitch)) tmpInfo['pitch'] = -data.headPitch * toRad;
+    if (data.headYaw !== undefined && !isNaN(data.headYaw)) tmpInfo['yaw'] = data.headYaw * toRad;
+    if (data.headRoll !== undefined && !isNaN(data.headRoll)) tmpInfo['roll'] = data.headRoll * toRad;
+
+    // Optional: Head Position (scaled)
+    // if (data.headX !== undefined && !isNaN(data.headX)) tmpInfo['x'] = data.headX * 0.5; // Scale TBD
+
+    // --- Smoothing Helper ---
+    // Smooth factor: 0.0 = no move, 1.0 = instant move.
+    // Lower = smoother but more latency. 0.5 is a good balance.
+    const SMOOTH_FACTOR = 0.5;
+    const MOUTH_SMOOTH = 0.8; // Faster response for speech
+
+    const applySmoothVal = (key, targetVal, factor = SMOOTH_FACTOR) => {
+        let oldVal = tmpInfo[key] || 0;
+        let newVal = oldVal * (1 - factor) + targetVal * factor;
+        tmpInfo[key] = newVal;
+    };
+
+    applySmoothVal('leftEyeOpen', 1 - getVal('eyeBlink_L'));
+    applySmoothVal('rightEyeOpen', 1 - getVal('eyeBlink_R'));
+
+    // Iris X (Yaw)
+    let irisX = (getVal('eyeLookIn_L') + getVal('eyeLookOut_R')) - (getVal('eyeLookOut_L') + getVal('eyeLookIn_R'));
+    let targetIrisX = isNaN(irisX) ? 0 : irisX * 0.2;
+    applySmoothVal('irisPos', targetIrisX);
+
+    // Iris Y (Pitch)
+    let irisY = (getVal('eyeLookUp_L') + getVal('eyeLookUp_R')) - (getVal('eyeLookDown_L') + getVal('eyeLookDown_R'));
+    let targetIrisY = isNaN(irisY) ? 0 : irisY * 0.2;
+    applySmoothVal('irisYPos', targetIrisY);
+
+    // --- Mouth ---
+    const AMP = 1.0;
+    const MOUTH_OFFSET = 0.1;
+    const applyOffset = (v) => Math.max(0, v - MOUTH_OFFSET) * (1 / (1 - MOUTH_OFFSET));
+
+    let jawVal = applyOffset(getVal('jawOpen'));
+    applySmoothVal('mouth', Math.min(1, jawVal * AMP), MOUTH_SMOOTH);
+
+    // Apply to other shapes
+    applySmoothVal('mouthFunnel', Math.min(1, applyOffset(getVal('mouthFunnel')) * AMP), MOUTH_SMOOTH);
+    applySmoothVal('mouthPucker', Math.min(1, applyOffset(getVal('mouthPucker')) * AMP), MOUTH_SMOOTH);
+
+    // Stretch
+    let stretchVal = Math.min(1, applyOffset((getVal('mouthStretch_L') * 0.5 + getVal('mouthStretch_R') * 0.5)));
+    applySmoothVal('mouthStretch', stretchVal, MOUTH_SMOOTH);
+
+    applySmoothVal('mouthSmile', Math.min(1, (getVal('mouthSmile_L') * 0.5 + getVal('mouthSmile_R') * 0.5) * 1.2), MOUTH_SMOOTH);
+
+    // New Mouth Shapes
+    applySmoothVal('mouthFrown', Math.min(1, (getVal('mouthFrown_L') + getVal('mouthFrown_R')) * 0.5 * AMP), MOUTH_SMOOTH);
+    applySmoothVal('mouthDimple', Math.min(1, (getVal('mouthDimple_L') + getVal('mouthDimple_R')) * 0.5 * AMP), MOUTH_SMOOTH);
+    applySmoothVal('mouthPress', Math.min(1, (getVal('mouthPress_L') + getVal('mouthPress_R')) * 0.5 * AMP), MOUTH_SMOOTH);
+    applySmoothVal('mouthShrug', Math.min(1, (getVal('mouthShrugLower') + getVal('mouthShrugUpper')) * 0.5 * AMP), MOUTH_SMOOTH);
+    applySmoothVal('mouthRoll', Math.min(1, (getVal('mouthRollLower') + getVal('mouthRollUpper')) * 0.5 * AMP), MOUTH_SMOOTH);
+
+    // Tongue
+    applySmoothVal('tongueOut', getVal('tongueOut'), MOUTH_SMOOTH);
+
+    // --- Brows ---
+    const BROW_AMP = 2.5;
+
+    applySmoothVal('brows', Math.min(1, getVal('browInnerUp') * BROW_AMP));
+    applySmoothVal('browOuterUp', Math.min(1, (getVal('browOuterUp_L') + getVal('browOuterUp_R')) * 0.5 * BROW_AMP));
+    applySmoothVal('browDown', Math.min(1, (getVal('browDown_L') + getVal('browDown_R')) * 0.5 * BROW_AMP));
+
+    // --- Cheeks ---
+    applySmoothVal('cheekPuff', getVal('cheekPuff'));
+    applySmoothVal('cheekSquint', (getVal('cheekSquint_L') + getVal('cheekSquint_R')) * 0.5);
+
+    // Force update
+    pushInfo(tmpInfo);
 }
 
 // call worker with image
@@ -173,49 +269,108 @@ function extractMouthEyes(keys) {
         'p': {},
         'e': {}
     };
-    if (getCMV("MOOD") != "fun") {
-        // mouth
-        let mouthRatio = ratioLimit((keys['mouth'] - getCMV("MOUTH_OPEN_OFFSET")) * getCMV('MOUTH_RATIO'));
+
+    // --- Extended Shapes & Mood Logic ---
+    const allowTracking = getCMV("MOOD") !== "fun";
+
+    // --- Mouth ---
+    // Basic Open (A)
+    let mouthRatio;
+    if (getCMV('USE_IFACIALMOCAP')) {
+        // iFacialMocap data is already 0-1, use directly
+        mouthRatio = keys['mouth'];
+    } else {
+        // Webcam data needs scaling
+        mouthRatio = ratioLimit((keys['mouth'] - getCMV("MOUTH_OPEN_OFFSET")) * getCMV('MOUTH_RATIO'));
+    }
+    if (allowTracking) {
         meinfo['b']['aa'] = mouthRatio;
-        // irises
-        let irispos = keys['irisPos'];
-        let irisY = (irispos - getCMV('IRIS_POS_OFFSET')) * getCMV('IRIS_POS_RATIO');
-        meinfo['r']['rightEye'] = [0, irisY, 0];
-        meinfo['r']['leftEye'] = [0, irisY, 0];
-        // brows
-        let browspos = Math.min(1, Math.max(0, keys['brows'] - getCMV("BROWS_OFFSET")) * getCMV("BROWS_RATIO"));
-        meinfo['b']['Brows up'] = browspos;
-        // auto
-        let happyThresholdForEyes = 1;
-        if (getCMV("MOOD") == "auto") {
-            let autoV = Math.max(-1, Math.min(1, keys["auto"] * getCMV("MOOD_AUTO_RATIO")));
-            let absauto = Math.max(0, Math.abs(autoV) - getCMV("MOOD_AUTO_OFFSET"));
-            let browspos = Math.min(1, Math.max(0, keys['brows'] - getCMV("BROWS_OFFSET")) * getCMV("BROWS_RATIO"));
-            let browslimit = 0.1;
-            let balFun = Math.min(browslimit, Math.max(0, browspos));
-            let balSor = Math.min(browslimit / 2, Math.max(0, (browslimit - balFun) / 2));
-            let balAng = Math.min(browslimit / 2, Math.max(0, (browslimit - balFun) / 2));
-            if (autoV < 0) {
-                meinfo['b']['angry'] = balAng;
-                meinfo['b']['sad'] = absauto + balSor;
-                meinfo['b']['happy'] = balFun;
-                meinfo['b']['ee'] = 0;
-            } else {
-                happyThresholdForEyes = 1 - absauto;
-                meinfo['b']['angry'] = balAng;
-                meinfo['b']['sad'] = balSor;
-                meinfo['b']['happy'] = absauto + balFun;
-                meinfo['b']['ee'] = absauto;
-            }
+    }
+
+    // Extended Shapes (if available from iFacialMocap)
+    if (keys['mouthFunnel'] !== undefined) meinfo['b']['oh'] = keys['mouthFunnel']; // O
+    if (keys['mouthPucker'] !== undefined) meinfo['b']['ou'] = keys['mouthPucker']; // U
+    if (keys['mouthStretch'] !== undefined) meinfo['b']['ih'] = keys['mouthStretch']; // I / E
+
+    // Frown -> Sorrow/Sad
+    if (allowTracking && keys['mouthFrown'] !== undefined && getCMV("MOOD") !== "sorrow") {
+        let frownVal = keys['mouthFrown'] > 0.1 ? keys['mouthFrown'] : 0;
+        // Mix with existing sad if any
+        let currentSad = meinfo['b']['sad'] || 0;
+        meinfo['b']['sad'] = Math.max(currentSad, frownVal);
+    }
+
+    // Tongue
+    if (allowTracking && keys['tongueOut'] !== undefined) {
+        meinfo['b']['tongue'] = keys['tongueOut'] > 0.1 ? keys['tongueOut'] : 0;
+    }
+
+    // Cheek Puff
+    if (allowTracking && keys['cheekPuff'] !== undefined) {
+        meinfo['b']['puff'] = keys['cheekPuff'] > 0.1 ? keys['cheekPuff'] : 0;
+    }
+
+    // --- Brows ---
+    let browInner = keys['brows'] || 0;
+    let browOuter = keys['browOuterUp'] || 0;
+    // Combine inner and outer for general "Brows up"
+    let browspos = Math.min(1, Math.max(0, Math.max(browInner, browOuter) - getCMV("BROWS_OFFSET")) * getCMV("BROWS_RATIO"));
+    meinfo['b']['Brows up'] = browspos;
+
+    if (allowTracking && keys['browDown'] !== undefined && getCMV("MOOD") !== "angry") {
+        meinfo['b']['angry'] = keys['browDown'] > 0.1 ? keys['browDown'] : 0;
+    }
+
+    // --- Iris Rotation ---
+    let irispos = keys['irisPos'];
+    if (isNaN(irispos)) irispos = 0;
+
+    let irisY = (irispos - getCMV('IRIS_POS_OFFSET')) * getCMV('IRIS_POS_RATIO'); // Yaw (Left/Right)
+
+    let irisYPos = keys['irisYPos'] || 0;
+    if (isNaN(irisYPos)) irisYPos = 0;
+
+    let irisX = -irisYPos * getCMV('IRIS_POS_RATIO'); // Pitch (Up/Down)
+
+    // Safety check for array values
+    if (isNaN(irisX)) irisX = 0;
+    if (isNaN(irisY)) irisY = 0;
+
+    meinfo['r']['rightEye'] = [irisX, irisY, 0];
+    meinfo['r']['leftEye'] = [irisX, irisY, 0];
+
+    // --- Auto Mood / Smile ---
+    if (allowTracking && keys['mouthSmile'] !== undefined) {
+        meinfo['b']['happy'] = keys['mouthSmile'] > 0.1 ? keys['mouthSmile'] : 0;
+    }
+
+    // Keep existing Auto Mood logic as fallback
+    if (getCMV("MOOD") == "auto" && keys['mouthSmile'] === undefined) {
+        let autoV = Math.max(-1, Math.min(1, keys["auto"] * getCMV("MOOD_AUTO_RATIO")));
+        let absauto = Math.max(0, Math.abs(autoV) - getCMV("MOOD_AUTO_OFFSET"));
+        if (autoV < 0) {
+            meinfo['b']['angry'] = Math.max(meinfo['b']['angry'] || 0, absauto); // Mix
+        } else {
+            meinfo['b']['happy'] = Math.max(meinfo['b']['happy'] || 0, absauto); // Mix
         }
-        // eyes
-        let leo = keys['leftEyeOpen'];
-        let reo = keys['rightEyeOpen'];
-        if (getCMV("EYE_SYNC") || Math.abs(reo - leo) < getCMV('EYE_LINK_THRESHOLD')) {
-            let avgEye = (reo + leo) / 2;
-            leo = avgEye;
-            reo = avgEye;
-        }
+    }
+
+    // --- Eyes Blink ---
+    let happyThresholdForEyes = 1;
+    // If happy is high, eyes might squint.
+    if (meinfo['b']['happy'] > 0.5) happyThresholdForEyes = 1 - (meinfo['b']['happy'] - 0.5);
+
+    let leo = keys['leftEyeOpen'];
+    let reo = keys['rightEyeOpen'];
+
+    if (getCMV("EYE_SYNC") || Math.abs(reo - leo) < getCMV('EYE_LINK_THRESHOLD')) {
+        let avgEye = (reo + leo) / 2;
+        leo = avgEye;
+        reo = avgEye;
+    }
+
+    // Right Eye
+    if (allowTracking) {
         if (reo < getCMV('RIGHT_EYE_CLOSE_THRESHOLD')) {
             meinfo['b']['blinkRight'] = happyThresholdForEyes;
         } else if (reo < getCMV('RIGHT_EYE_OPEN_THRESHOLD')) {
@@ -224,6 +379,8 @@ function extractMouthEyes(keys) {
         } else {
             meinfo['b']['blinkRight'] = 0;
         }
+
+        // Left Eye
         if (leo < getCMV('LEFT_EYE_CLOSE_THRESHOLD')) {
             meinfo['b']['blinkLeft'] = happyThresholdForEyes;
         } else if (leo < getCMV('LEFT_EYE_OPEN_THRESHOLD')) {
@@ -232,7 +389,13 @@ function extractMouthEyes(keys) {
         } else {
             meinfo['b']['blinkLeft'] = 0;
         }
+    } else {
+        // Force eyes open (0) if tracking is disabled (e.g. Fun mood takes over),
+        // or let them stay at default. Usually 0 is safe to avoid conflict.
+        meinfo['b']['blinkRight'] = 0;
+        meinfo['b']['blinkLeft'] = 0;
     }
+
     return meinfo;
 }
 
@@ -309,16 +472,16 @@ function extractBody(keys) {
     let leanRatio = Math.min(1, Math.max(-1, keys['lean'])) * 0.6;
     // head
     binfo['r']['head'] = [radLimit(keys['pitch'] * getCMV('HEAD_RATIO')) * getCMV('VRM_XR'),
-        radLimit(keys['yaw'] * getCMV('HEAD_RATIO') - leanRatio * 0.3) * getCMV('VRM_YR'),
-        radLimit(keys['roll'] * getCMV('HEAD_RATIO') - tiltRatio * 0.3) * getCMV('VRM_ZR')]
+    radLimit(keys['yaw'] * getCMV('HEAD_RATIO') - leanRatio * 0.3) * getCMV('VRM_YR'),
+    radLimit(keys['roll'] * getCMV('HEAD_RATIO') - tiltRatio * 0.3) * getCMV('VRM_ZR')]
     // neck
     binfo['r']['neck'] = [radLimit(keys['pitch'] * getCMV('NECK_RATIO')) * getCMV('VRM_XR'),
-        radLimit(keys['yaw'] * getCMV('NECK_RATIO') - leanRatio * 0.7) * getCMV('VRM_YR'),
-        radLimit(keys['roll'] * getCMV('NECK_RATIO') - tiltRatio * 0.7) * getCMV('VRM_ZR')];
+    radLimit(keys['yaw'] * getCMV('NECK_RATIO') - leanRatio * 0.7) * getCMV('VRM_YR'),
+    radLimit(keys['roll'] * getCMV('NECK_RATIO') - tiltRatio * 0.7) * getCMV('VRM_ZR')];
     // chest
     binfo['r']['spine'] = [radLimit(keys['pitch'] * getCMV('CHEST_RATIO')) * getCMV('VRM_XR'),
-        radLimit(keys['yaw'] * getCMV('CHEST_RATIO') + leanRatio) * getCMV('VRM_YR'),
-        radLimit(keys['roll'] * getCMV('CHEST_RATIO') + tiltRatio) * getCMV('VRM_ZR')];
+    radLimit(keys['yaw'] * getCMV('CHEST_RATIO') + leanRatio) * getCMV('VRM_YR'),
+    radLimit(keys['roll'] * getCMV('CHEST_RATIO') + tiltRatio) * getCMV('VRM_ZR')];
     // left right arm
     if (getCMV('TRACKING_MODE') == "Upper-Body") {
         for (let i = 0; i < 2; i++) {

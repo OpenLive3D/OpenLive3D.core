@@ -112,10 +112,19 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    updateRenderResolution();
     foregroundeffect.width = window.innerWidth;
     foregroundeffect.height = window.innerHeight;
     backgroundeffect.width = window.innerWidth;
     backgroundeffect.height = window.innerHeight;
+}
+
+function updateRenderResolution() {
+    let resRatio = 1.0;
+    if (typeof getCMV === "function" && getCMV("RENDER_RESOLUTION") !== undefined) {
+        resRatio = getCMV("RENDER_RESOLUTION");
+    }
+    renderer.setPixelRatio(window.devicePixelRatio * resRatio);
 }
 
 function resetCameraPos(pos) {
@@ -241,6 +250,7 @@ function updateMusicList() {
 function createLayout() {
     updateTheme();
     setBackGround();
+    updateRenderResolution();
 
     // vrm loading button
     let vrmboxbtn = document.getElementById("vrmboxbutton");
@@ -619,6 +629,9 @@ function createLayout() {
                     let newvalue = (itemval.value - configitem['range'][0]) * 1000 / setrange;
                     item.setAttribute("value", newvalue);
                     setCMV(configitem['key'], itemval.value);
+                    if (configitem['key'] === 'RENDER_RESOLUTION') {
+                        updateRenderResolution();
+                    }
                 };
                 confgroup.appendChild(itemval);
             }

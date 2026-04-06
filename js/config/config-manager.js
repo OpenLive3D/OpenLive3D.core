@@ -114,7 +114,8 @@ let defaultConfig = {
     'IN_TRACKING_MODE_SELECT': false,
     'TEST_MOBILE_ENTRY': false,
     'TEST_SAFARI_ENTRY': false,
-    'UI_THEME': "OpenLive3D"
+    'UI_THEME': "OpenLive3D",
+    'RENDER_RESOLUTION': 1.0
 };
 
 function getDefaultCMV(key) {
@@ -401,6 +402,12 @@ function getConfigModifiers() {
             'title': 'Multi Thread Option',
             'describe': 'Select to use multi-thread or not',
             'valid': [true, false]
+        }],
+        '3D_RESOLUTION': [{
+            'key': 'RENDER_RESOLUTION',
+            'title': 'Render Resolution',
+            'describe': 'Adjust the 3D render resolution ratio. Default is 1.0. Lower for performance, higher for quality.',
+            'range': [0.1, 2.0]
         }],
         'SMOOTH': [{
             'key': 'SENSITIVITY_SCALE',

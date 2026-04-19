@@ -115,7 +115,8 @@ let defaultConfig = {
     'TEST_MOBILE_ENTRY': false,
     'TEST_SAFARI_ENTRY': false,
     'UI_THEME': "OpenLive3D",
-    'RENDER_RESOLUTION': 1.0
+    'RENDER_RESOLUTION': 1.0,
+    'AA_MODE': 'None (Fastest)'
 };
 
 function getDefaultCMV(key) {
@@ -334,7 +335,7 @@ function getBinaryCM() {
 }
 
 function getSelectCM() {
-    return ['LANGUAGE', 'TRACKING_MODE', 'UI_THEME'];
+    return ['LANGUAGE', 'TRACKING_MODE', 'UI_THEME', 'AA_MODE'];
 }
 
 function getSideBoxes() {
@@ -403,7 +404,12 @@ function getConfigModifiers() {
             'describe': 'Select to use multi-thread or not',
             'valid': [true, false]
         }],
-        '3D_RESOLUTION': [{
+        'RENDERING': [{
+            'key': 'AA_MODE',
+            'title': 'Anti-Aliasing',
+            'describe': 'Select anti-aliasing mode. FXAA is a fast shader-based filter. MSAA uses hardware multi-sampling via render targets. Combine both for best quality.',
+            'valid': ['None (Fastest)', 'FXAA (Fast)', 'MSAA 4x (Balanced)', 'MSAA 4x + FXAA (Quality)']
+        }, {
             'key': 'RENDER_RESOLUTION',
             'title': 'Render Resolution',
             'describe': 'Adjust the 3D render resolution ratio. Default is 1.0. Lower for performance, higher for quality.',

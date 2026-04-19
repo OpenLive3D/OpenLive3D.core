@@ -113,6 +113,7 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     updateRenderResolution();
+    updatePostProcessingSize();
     foregroundeffect.width = window.innerWidth;
     foregroundeffect.height = window.innerHeight;
     backgroundeffect.width = window.innerWidth;
@@ -125,6 +126,171 @@ function updateRenderResolution() {
         resRatio = getCMV("RENDER_RESOLUTION");
     }
     renderer.setPixelRatio(window.devicePixelRatio * resRatio);
+}
+
+// --- Anti-Aliasing Post-Processing Pipeline ---
+let ppRenderTarget = null;
+let ppScene = null;
+let ppCamera = null;
+let ppQuad = null;
+
+const _fxaaVertexShader = [
+    'varying vec2 vUv;',
+    'void main() {',
+    '    vUv = uv;',
+    '    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
+    '}'
+].join('\n');
+
+const _fxaaFragmentShader = [
+    'uniform sampler2D tDiffuse;',
+    'uniform vec2 resolution;',
+    'varying vec2 vUv;',
+    '',
+    '#define FXAA_REDUCE_MIN (1.0 / 128.0)',
+    '#define FXAA_REDUCE_MUL (1.0 / 8.0)',
+    '#define FXAA_SPAN_MAX 8.0',
+    '',
+    'vec3 linearToSRGB(vec3 color) {',
+    '    return mix(color * 12.92, 1.055 * pow(color, vec3(1.0/2.4)) - 0.055, step(0.0031308, color));',
+    '}',
+    '',
+    'void main() {',
+    '    vec2 inverseVP = vec2(1.0) / resolution;',
+    '    vec3 rgbNW = texture2D(tDiffuse, vUv + vec2(-1.0, -1.0) * inverseVP).xyz;',
+    '    vec3 rgbNE = texture2D(tDiffuse, vUv + vec2( 1.0, -1.0) * inverseVP).xyz;',
+    '    vec3 rgbSW = texture2D(tDiffuse, vUv + vec2(-1.0,  1.0) * inverseVP).xyz;',
+    '    vec3 rgbSE = texture2D(tDiffuse, vUv + vec2( 1.0,  1.0) * inverseVP).xyz;',
+    '    vec4 texColor = texture2D(tDiffuse, vUv);',
+    '    vec3 rgbM = texColor.xyz;',
+    '',
+    '    vec3 luma = vec3(0.299, 0.587, 0.114);',
+    '    float lumaNW = dot(rgbNW, luma);',
+    '    float lumaNE = dot(rgbNE, luma);',
+    '    float lumaSW = dot(rgbSW, luma);',
+    '    float lumaSE = dot(rgbSE, luma);',
+    '    float lumaM  = dot(rgbM, luma);',
+    '    float lumaMin = min(lumaM, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));',
+    '    float lumaMax = max(lumaM, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));',
+    '',
+    '    vec2 dir;',
+    '    dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));',
+    '    dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));',
+    '',
+    '    float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) * (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);',
+    '    float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);',
+    '    dir = min(vec2(FXAA_SPAN_MAX), max(vec2(-FXAA_SPAN_MAX), dir * rcpDirMin)) * inverseVP;',
+    '',
+    '    vec4 rgbA = 0.5 * (',
+    '        texture2D(tDiffuse, vUv + dir * (1.0/3.0 - 0.5)) +',
+    '        texture2D(tDiffuse, vUv + dir * (2.0/3.0 - 0.5)));',
+    '    vec4 rgbB = rgbA * 0.5 + 0.25 * (',
+    '        texture2D(tDiffuse, vUv + dir * -0.5) +',
+    '        texture2D(tDiffuse, vUv + dir *  0.5));',
+    '',
+    '    float lumaB = dot(rgbB.xyz, luma);',
+    '    vec3 result;',
+    '',
+    '    if (lumaB < lumaMin || lumaB > lumaMax) {',
+    '        result = rgbA.xyz;',
+    '    } else {',
+    '        result = rgbB.xyz;',
+    '    }',
+    '    gl_FragColor = vec4(linearToSRGB(result), texColor.a);',
+    '}'
+].join('\n');
+
+const _passthroughFragmentShader = [
+    'uniform sampler2D tDiffuse;',
+    'varying vec2 vUv;',
+    'vec3 linearToSRGB(vec3 color) {',
+    '    return mix(color * 12.92, 1.055 * pow(color, vec3(1.0/2.4)) - 0.055, step(0.0031308, color));',
+    '}',
+    'void main() {',
+    '    vec4 tex = texture2D(tDiffuse, vUv);',
+    '    gl_FragColor = vec4(linearToSRGB(tex.rgb), tex.a);',
+    '}'
+].join('\n');
+
+function setupPostProcessing(useFXAA, useMSAA) {
+    // Dispose old resources
+    if (ppRenderTarget) {
+        ppRenderTarget.dispose();
+        ppRenderTarget = null;
+    }
+    if (ppQuad) {
+        ppQuad.geometry.dispose();
+        ppQuad.material.dispose();
+        ppQuad = null;
+    }
+    ppScene = null;
+    ppCamera = null;
+
+    if (!useFXAA && !useMSAA) return;
+
+    let size = renderer.getSize(new THREE.Vector2());
+    let pixelRatio = renderer.getPixelRatio();
+    let w = Math.floor(size.x * pixelRatio);
+    let h = Math.floor(size.y * pixelRatio);
+
+    let targetOptions = {};
+    if (useMSAA) targetOptions.samples = 4;
+    ppRenderTarget = new THREE.WebGLRenderTarget(w, h, targetOptions);
+
+    let fragShader = useFXAA ? _fxaaFragmentShader : _passthroughFragmentShader;
+    let uniforms = {
+        tDiffuse: {
+            value: ppRenderTarget.texture
+        }
+    };
+    if (useFXAA) {
+        uniforms.resolution = {
+            value: new THREE.Vector2(w, h)
+        };
+    }
+
+    let material = new THREE.ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader: _fxaaVertexShader,
+        fragmentShader: fragShader,
+        depthTest: false,
+        depthWrite: false,
+        blending: THREE.NoBlending,
+        toneMapped: false
+    });
+
+    ppCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    ppScene = new THREE.Scene();
+    ppQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+    ppScene.add(ppQuad);
+}
+
+function updatePostProcessingSize() {
+    if (!ppRenderTarget) return;
+    let size = renderer.getSize(new THREE.Vector2());
+    let pixelRatio = renderer.getPixelRatio();
+    let w = Math.floor(size.x * pixelRatio);
+    let h = Math.floor(size.y * pixelRatio);
+    ppRenderTarget.setSize(w, h);
+    if (ppQuad && ppQuad.material.uniforms.resolution) {
+        ppQuad.material.uniforms.resolution.value.set(w, h);
+    }
+}
+
+function applyAAMode() {
+    let aaMode = 'None (Fastest)';
+    if (typeof getCMV === "function" && getCMV("AA_MODE") !== undefined) {
+        aaMode = getCMV("AA_MODE");
+    }
+    let useMSAA = aaMode.indexOf('MSAA') !== -1;
+    let useFXAA = aaMode.indexOf('FXAA') !== -1;
+    setupPostProcessing(useFXAA, useMSAA);
+}
+
+function recreateRenderer() {
+    updateRenderResolution();
+    setBackGround();
+    applyAAMode();
 }
 
 function resetCameraPos(pos) {
@@ -249,8 +415,7 @@ function updateMusicList() {
 
 function createLayout() {
     updateTheme();
-    setBackGround();
-    updateRenderResolution();
+    recreateRenderer();
 
     // vrm loading button
     let vrmboxbtn = document.getElementById("vrmboxbutton");
@@ -600,6 +765,8 @@ function createLayout() {
                         setTrackingModeSelect(itemselect.value);
                     } else if (configitem['key'] == "UI_THEME") {
                         updateTheme();
+                    } else if (configitem['key'] === 'AA_MODE') {
+                        applyAAMode();
                     }
                 };
                 confgroup.appendChild(itemselect);
@@ -631,6 +798,7 @@ function createLayout() {
                     setCMV(configitem['key'], itemval.value);
                     if (configitem['key'] === 'RENDER_RESOLUTION') {
                         updateRenderResolution();
+                        updatePostProcessingSize();
                     }
                 };
                 confgroup.appendChild(itemval);
@@ -1035,7 +1203,18 @@ function drawScene() {
         setCMV('SCENE_FLIP', getCMV('CAMERA_FLIP'));
         scene.applyMatrix4(new THREE.Matrix4().makeScale(-1, 1, 1));
     }
-    renderer.render(scene, camera);
+    if (ppRenderTarget && ppQuad) {
+        // Render scene to LINEAR render target
+        renderer.outputEncoding = THREE.LinearEncoding;
+        renderer.setRenderTarget(ppRenderTarget);
+        renderer.render(scene, camera);
+        // Render quad to screen (shader applies linearToSRGB)
+        renderer.setRenderTarget(null);
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.render(ppScene, ppCamera);
+    } else {
+        renderer.render(scene, camera);
+    }
 }
 
 function hideSideboxes() {

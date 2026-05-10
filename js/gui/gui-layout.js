@@ -120,12 +120,69 @@ function onWindowResize() {
     backgroundeffect.height = window.innerHeight;
 }
 
-function updateRenderResolution() {
-    let resRatio = 1.0;
-    if (typeof getCMV === "function" && getCMV("RENDER_RESOLUTION") !== undefined) {
-        resRatio = getCMV("RENDER_RESOLUTION");
+function getRenderResRatio() {
+    let resRatio = getCMV("RENDER_RESOLUTION") || 1.0;
+    let aaMode = getCMV("AA_MODE") || "";
+    if (aaMode.includes("FSR")) {
+        let preset = getCMV("UPSCALING_PRESET") || "Ultra Quality (0.77x)";
+        if (preset === "Ultra Quality (0.77x)") resRatio = 0.77;
+        else if (preset === "Quality (0.67x)") resRatio = 0.67;
+        else if (preset === "Balanced (0.59x)") resRatio = 0.59;
+        else if (preset === "Performance (0.50x)") resRatio = 0.50;
     }
-    renderer.setPixelRatio(window.devicePixelRatio * resRatio);
+    return resRatio;
+}
+
+function updateRenderingUI() {
+    let aaMode = getCMV("AA_MODE") || "";
+    let useFSR = aaMode.includes("FSR");
+    let preset = getCMV("UPSCALING_PRESET") || "Custom";
+
+    let toggleVisibility = (key, show) => {
+        let box = document.getElementById(key + "_box");
+        if (!box) return;
+
+        let isSelect = getSelectCM().includes(key);
+        let nextEl = box.nextElementSibling;
+
+        if (isSelect) {
+            box.style.display = "none"; // Keep dummy input hidden
+            if (nextEl && nextEl.tagName === 'SELECT') {
+                nextEl.style.display = show ? "" : "none";
+                let finalBr = nextEl.nextElementSibling;
+                if (finalBr && finalBr.tagName === 'BR') finalBr.style.display = show ? "" : "none";
+            }
+        } else {
+            box.style.display = show ? "" : "none"; // Range slider
+            if (nextEl && nextEl.tagName === 'INPUT') {
+                nextEl.style.display = show ? "inline-block" : "none";
+                let finalBr = nextEl.nextElementSibling;
+                if (finalBr && finalBr.tagName === 'BR') finalBr.style.display = show ? "" : "none";
+            }
+        }
+
+        let br1 = box.previousElementSibling;
+        if (br1 && br1.tagName === 'BR') br1.style.display = show ? "" : "none";
+        let name = br1 ? br1.previousElementSibling : null;
+        if (name) name.style.display = show ? "" : "none";
+        let info = name ? name.previousElementSibling : null;
+        if (info) info.style.display = show ? "" : "none";
+    };
+
+    toggleVisibility("UPSCALING_PRESET", useFSR);
+    toggleVisibility("FSR_SHARPNESS", useFSR);
+    toggleVisibility("RENDER_RESOLUTION", !useFSR || preset === "Custom");
+}
+
+function updateRenderResolution() {
+    let aaMode = typeof getCMV === "function" ? getCMV("AA_MODE") || "" : "";
+    let resRatio = getRenderResRatio();
+
+    if (aaMode.includes("FSR")) {
+        renderer.setPixelRatio(window.devicePixelRatio); // FSR handle scale
+    } else {
+        renderer.setPixelRatio(window.devicePixelRatio * resRatio);
+    }
 }
 
 // --- Anti-Aliasing Post-Processing Pipeline ---
@@ -133,6 +190,10 @@ let ppRenderTarget = null;
 let ppScene = null;
 let ppCamera = null;
 let ppQuad = null;
+let fxaaRenderTarget = null;
+let easuRenderTarget = null;
+let easuQuad = null;
+let rcasQuad = null;
 
 const _fxaaVertexShader = [
     'varying vec2 vUv;',
@@ -145,6 +206,7 @@ const _fxaaVertexShader = [
 const _fxaaFragmentShader = [
     'uniform sampler2D tDiffuse;',
     'uniform vec2 resolution;',
+    'uniform bool convertToSRGB;',
     'varying vec2 vUv;',
     '',
     '#define FXAA_REDUCE_MIN (1.0 / 128.0)',
@@ -196,7 +258,11 @@ const _fxaaFragmentShader = [
     '    } else {',
     '        result = rgbB.xyz;',
     '    }',
-    '    gl_FragColor = vec4(linearToSRGB(result), texColor.a);',
+    '    if (convertToSRGB) {',
+    '        gl_FragColor = vec4(linearToSRGB(result), texColor.a);',
+    '    } else {',
+    '        gl_FragColor = vec4(result, texColor.a);',
+    '    }',
     '}'
 ].join('\n');
 
@@ -212,59 +278,123 @@ const _passthroughFragmentShader = [
     '}'
 ].join('\n');
 
-function setupPostProcessing(useFXAA, useMSAA) {
-    // Dispose old resources
+function setupPostProcessing(useFXAA, useMSAA, useFSR) {
     if (ppRenderTarget) { ppRenderTarget.dispose(); ppRenderTarget = null; }
-    if (ppQuad) {
-        ppQuad.geometry.dispose();
-        ppQuad.material.dispose();
-        ppQuad = null;
-    }
+    if (fxaaRenderTarget) { fxaaRenderTarget.dispose(); fxaaRenderTarget = null; }
+    if (easuRenderTarget) { easuRenderTarget.dispose(); easuRenderTarget = null; }
+    if (ppQuad) { ppQuad.geometry.dispose(); ppQuad.material.dispose(); ppQuad = null; }
+    if (easuQuad) { easuQuad.geometry.dispose(); easuQuad = null; }
+    if (rcasQuad) { rcasQuad.geometry.dispose(); rcasQuad = null; }
     ppScene = null;
     ppCamera = null;
 
-    if (!useFXAA && !useMSAA) return;
+    let resRatio = getRenderResRatio();
+    if (!useFXAA && !useMSAA && !useFSR && resRatio === 1.0) return;
 
     let size = renderer.getSize(new THREE.Vector2());
-    let pixelRatio = renderer.getPixelRatio();
-    let w = Math.floor(size.x * pixelRatio);
-    let h = Math.floor(size.y * pixelRatio);
+    let displayW = Math.floor(size.x * window.devicePixelRatio);
+    let displayH = Math.floor(size.y * window.devicePixelRatio);
+    let renderW = displayW;
+    let renderH = displayH;
+
+    if (useFSR) {
+        renderW = Math.floor(displayW * resRatio);
+        renderH = Math.floor(displayH * resRatio);
+    } else {
+        let pixelRatio = renderer.getPixelRatio();
+        renderW = Math.floor(size.x * pixelRatio);
+        renderH = Math.floor(size.y * pixelRatio);
+    }
 
     let targetOptions = {};
     if (useMSAA) targetOptions.samples = 4;
-    ppRenderTarget = new THREE.WebGLRenderTarget(w, h, targetOptions);
-
-    let fragShader = useFXAA ? _fxaaFragmentShader : _passthroughFragmentShader;
-    let uniforms = { tDiffuse: { value: ppRenderTarget.texture } };
-    if (useFXAA) {
-        uniforms.resolution = { value: new THREE.Vector2(w, h) };
-    }
-
-    let material = new THREE.ShaderMaterial({
-        uniforms: uniforms,
-        vertexShader: _fxaaVertexShader,
-        fragmentShader: fragShader,
-        depthTest: false,
-        depthWrite: false,
-        blending: THREE.NoBlending,
-        toneMapped: false
-    });
-
+    ppRenderTarget = new THREE.WebGLRenderTarget(renderW, renderH, targetOptions);
     ppCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     ppScene = new THREE.Scene();
-    ppQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
-    ppScene.add(ppQuad);
+
+    if (useFSR) {
+        easuRenderTarget = new THREE.WebGLRenderTarget(displayW, displayH);
+        if (useFXAA) {
+            fxaaRenderTarget = new THREE.WebGLRenderTarget(renderW, renderH);
+            let fxaaMat = new THREE.ShaderMaterial({
+                uniforms: {
+                    tDiffuse: { value: ppRenderTarget.texture },
+                    resolution: { value: new THREE.Vector2(renderW, renderH) },
+                    convertToSRGB: { value: false } // Output linear for FSR
+                },
+                vertexShader: _fxaaVertexShader,
+                fragmentShader: _fxaaFragmentShader,
+                depthTest: false, depthWrite: false, blending: THREE.NoBlending, toneMapped: false
+            });
+            ppQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), fxaaMat);
+        }
+        setupFSR(displayW, displayH, renderW, renderH);
+        fsrEASUMaterial.uniforms.tDiffuse.value = useFXAA ? fxaaRenderTarget.texture : ppRenderTarget.texture;
+        fsrRCASMaterial.uniforms.tDiffuse.value = easuRenderTarget.texture;
+        easuQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), fsrEASUMaterial);
+        rcasQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), fsrRCASMaterial);
+    } else {
+        let fragShader = useFXAA ? _fxaaFragmentShader : _passthroughFragmentShader;
+        let uniforms = { tDiffuse: { value: ppRenderTarget.texture } };
+        if (useFXAA) {
+            uniforms.resolution = { value: new THREE.Vector2(renderW, renderH) };
+            uniforms.convertToSRGB = { value: true }; // Final pass, output sRGB
+        }
+        let material = new THREE.ShaderMaterial({
+            uniforms: uniforms, vertexShader: _fxaaVertexShader, fragmentShader: fragShader,
+            depthTest: false, depthWrite: false, blending: THREE.NoBlending, toneMapped: false
+        });
+        ppQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+        ppScene.add(ppQuad);
+    }
 }
 
 function updatePostProcessingSize() {
     if (!ppRenderTarget) return;
+
     let size = renderer.getSize(new THREE.Vector2());
-    let pixelRatio = renderer.getPixelRatio();
-    let w = Math.floor(size.x * pixelRatio);
-    let h = Math.floor(size.y * pixelRatio);
-    ppRenderTarget.setSize(w, h);
-    if (ppQuad && ppQuad.material.uniforms.resolution) {
-        ppQuad.material.uniforms.resolution.value.set(w, h);
+    let displayW = Math.floor(size.x * window.devicePixelRatio);
+    let displayH = Math.floor(size.y * window.devicePixelRatio);
+
+    let aaMode = typeof getCMV === "function" ? getCMV("AA_MODE") || "" : "";
+    let useFSR = aaMode.includes("FSR");
+    let resRatio = getRenderResRatio();
+
+    let renderW = displayW;
+    let renderH = displayH;
+
+    if (useFSR) {
+        renderW = Math.floor(displayW * resRatio);
+        renderH = Math.floor(displayH * resRatio);
+    } else {
+        let pixelRatio = renderer.getPixelRatio();
+        renderW = Math.floor(size.x * pixelRatio);
+        renderH = Math.floor(size.y * pixelRatio);
+    }
+
+    // Always resize base target to render resolution
+    ppRenderTarget.setSize(renderW, renderH);
+
+    if (useFSR) {
+        if (easuRenderTarget) easuRenderTarget.setSize(displayW, displayH);
+        if (fxaaRenderTarget) fxaaRenderTarget.setSize(renderW, renderH);
+
+        // Update FSR uniform resolutions
+        if (typeof fsrEASUMaterial !== 'undefined' && fsrEASUMaterial) {
+            fsrEASUMaterial.uniforms.resolution.value.set(displayW, displayH);
+            fsrEASUMaterial.uniforms.renderResolution.value.set(renderW, renderH);
+        }
+        if (typeof fsrRCASMaterial !== 'undefined' && fsrRCASMaterial) {
+            fsrRCASMaterial.uniforms.resolution.value.set(displayW, displayH);
+        }
+        if (ppQuad && ppQuad.material.uniforms.resolution) {
+            ppQuad.material.uniforms.resolution.value.set(renderW, renderH);
+        }
+    } else {
+        // Standard pass FXAA resolution update
+        if (ppQuad && ppQuad.material.uniforms.resolution) {
+            ppQuad.material.uniforms.resolution.value.set(renderW, renderH);
+        }
     }
 }
 
@@ -275,7 +405,8 @@ function applyAAMode() {
     }
     let useMSAA = aaMode.indexOf('MSAA') !== -1;
     let useFXAA = aaMode.indexOf('FXAA') !== -1;
-    setupPostProcessing(useFXAA, useMSAA);
+    let useFSR = aaMode.indexOf('FSR') !== -1;
+    setupPostProcessing(useFXAA, useMSAA, useFSR);
 }
 
 function recreateRenderer() {
@@ -750,8 +881,9 @@ function createLayout() {
                         setTrackingModeSelect(itemselect.value);
                     } else if (configitem['key'] == "UI_THEME") {
                         updateTheme();
-                    } else if (configitem['key'] === 'AA_MODE') {
-                        applyAAMode();
+                    } else if (configitem['key'] === 'AA_MODE' || configitem['key'] === 'UPSCALING_PRESET') {
+                        updateRenderingUI();
+                        recreateRenderer();
                     }
                 };
                 confgroup.appendChild(itemselect);
@@ -759,7 +891,7 @@ function createLayout() {
                 item.setAttribute("type", "range");
                 item.setAttribute("min", 0);
                 item.setAttribute("max", 1000);
-                let setrange = configitem['range'][1] - configitem['range'][0];
+                let setrange = configitem['range'][1] - configitem['range'][0]; // ADDED BACK
                 let setvalue = (getCMV(configitem['key']) - configitem['range'][0]) * 1000 / setrange;
                 item.setAttribute("value", setvalue);
                 item.onchange = function () {
@@ -779,9 +911,9 @@ function createLayout() {
                         itemval.value = configitem['range'][1];
                     }
                     let newvalue = (itemval.value - configitem['range'][0]) * 1000 / setrange;
-                    item.setAttribute("value", newvalue);
+                    item.value = newvalue;
                     setCMV(configitem['key'], itemval.value);
-                    if (configitem['key'] === 'RENDER_RESOLUTION') {
+                    if (configitem['key'] === 'RENDER_RESOLUTION' || configitem['key'] === 'FSR_SHARPNESS') {
                         updateRenderResolution();
                         updatePostProcessingSize();
                     }
@@ -874,6 +1006,7 @@ function createLayout() {
         about.appendChild(document.createElement("br"));
     }
 
+    updateRenderingUI();
     console.log("gui layout initialized");
 }
 
@@ -1162,16 +1295,20 @@ function raiseAlert(vistate, mlstate) {
         let alertbox = document.getElementById("alertbox");
         alertbox.style.display = "block";
         let alerttext = document.getElementById("alerttext");
+
         if (vistate == 3) {
             alerttext.innerHTML = getL("ALERT: Full Screen / Wrong Tab<br/>Browser will stop rendering when other program enters full screen!");
         } else if (mlstate == 3) {
             alerttext.innerHTML = getL("ALERT: Error<br/>ML loop stop running, might need to restart to validate.");
         } else if (mlstate == 2 || vistate == 2) {
             alerttext.innerHTML = getL("ALERT: Hardware Acceleration<br/>ML loop is running extremely slow, check if hardware acceleration is opened.");
-        } else if (mlstate == 1 && getCMV("HAND_TRACKING")) {
+        } else if (mlstate == 1 && getCMV("TRACKING_MODE") !== "Face-Only") {
             alerttext.innerHTML = getL("ALERT: Ultra Fast<br/>ML loop is running slowly, improve performance by using FACE-ONLY mode.");
         } else if (vistate == 1) {
             alerttext.innerHTML = getL("ALERT: Slow<br/>Feel free to contact developer for more information.");
+        } else {
+            // Fallback just in case
+            alerttext.innerHTML = "Performance Warning: Tracking FPS dropped.";
         }
     }
 }
@@ -1188,15 +1325,40 @@ function drawScene() {
         setCMV('SCENE_FLIP', getCMV('CAMERA_FLIP'));
         scene.applyMatrix4(new THREE.Matrix4().makeScale(-1, 1, 1));
     }
-    if (ppRenderTarget && ppQuad) {
-        // Render scene to LINEAR render target
+
+    let aaMode = typeof getCMV === "function" ? getCMV("AA_MODE") || "" : "";
+    let useFSR = aaMode.includes("FSR");
+
+    if (ppRenderTarget) {
         renderer.outputEncoding = THREE.LinearEncoding;
         renderer.setRenderTarget(ppRenderTarget);
         renderer.render(scene, camera);
-        // Render quad to screen (shader applies linearToSRGB)
-        renderer.setRenderTarget(null);
-        renderer.outputEncoding = THREE.sRGBEncoding;
-        renderer.render(ppScene, ppCamera);
+
+        if (useFSR) {
+            if (ppQuad && fxaaRenderTarget) {
+                renderer.setRenderTarget(fxaaRenderTarget);
+                ppScene.add(ppQuad);
+                renderer.render(ppScene, ppCamera);
+                ppScene.remove(ppQuad);
+            }
+            renderer.setRenderTarget(easuRenderTarget);
+            ppScene.add(easuQuad);
+            renderer.render(ppScene, ppCamera);
+            ppScene.remove(easuQuad);
+
+            renderer.setRenderTarget(null);
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            if (typeof fsrRCASMaterial !== 'undefined' && fsrRCASMaterial) {
+                fsrRCASMaterial.uniforms.sharpness.value = getCMV("FSR_SHARPNESS") !== undefined ? getCMV("FSR_SHARPNESS") : 0.2;
+            }
+            ppScene.add(rcasQuad);
+            renderer.render(ppScene, ppCamera);
+            ppScene.remove(rcasQuad);
+        } else {
+            renderer.setRenderTarget(null);
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.render(ppScene, ppCamera);
+        }
     } else {
         renderer.render(scene, camera);
     }

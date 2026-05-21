@@ -438,7 +438,7 @@ function getConfigModifiers() {
         }, {
             'key': 'RENDER_RESOLUTION',
             'title': 'Render Resolution',
-            'describe': 'Adjust the 3D render resolution ratio.',
+            'describe': 'Adjust the 3D render resolution ratio. Default is 1.0. Lower for performance, higher for quality.',
             'range': [0.1, 2.0]
         }],
         'SMOOTH': [{

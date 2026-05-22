@@ -116,7 +116,9 @@ let defaultConfig = {
     'TEST_SAFARI_ENTRY': false,
     'UI_THEME': "OpenLive3D",
     'RENDER_RESOLUTION': 1.0,
-    'AA_MODE': 'None (Fastest)'
+    'AA_MODE': 'None (Fastest)',
+    'UPSCALING_PRESET': 'Ultra Quality (0.77x)',
+    'FSR_SHARPNESS': 0.2,
 };
 
 function getDefaultCMV(key) {
@@ -335,7 +337,7 @@ function getBinaryCM() {
 }
 
 function getSelectCM() {
-    return ['LANGUAGE', 'TRACKING_MODE', 'UI_THEME', 'AA_MODE'];
+    return ['LANGUAGE', 'TRACKING_MODE', 'UI_THEME', 'AA_MODE', 'UPSCALING_PRESET'];
 }
 
 function getSideBoxes() {
@@ -407,8 +409,32 @@ function getConfigModifiers() {
         'RENDERING': [{
             'key': 'AA_MODE',
             'title': 'Anti-Aliasing',
-            'describe': 'Select anti-aliasing mode. FXAA is a fast shader-based filter. MSAA uses hardware multi-sampling via render targets. Combine both for best quality.',
-            'valid': ['None (Fastest)', 'FXAA (Fast)', 'MSAA 4x (Balanced)', 'MSAA 4x + FXAA (Quality)']
+            'describe': 'Select anti-aliasing and FSR upscaling.',
+            'valid': [
+                'None (Fastest)',
+                'FXAA (Fast)',
+                'MSAA 4x (Balanced)',
+                'MSAA 4x + FXAA (Quality)',
+                'FSR 1.0',
+                'FXAA + FSR 1.0',
+                'MSAA 4x + FSR 1.0'
+            ]
+        }, {
+            'key': 'UPSCALING_PRESET',
+            'title': 'FSR Quality',
+            'describe': 'FSR Resolution Presets. Custom allows manual scaling.',
+            'valid': [
+                'Ultra Quality (0.77x)',
+                'Quality (0.67x)',
+                'Balanced (0.59x)',
+                'Performance (0.50x)',
+                'Custom'
+            ]
+        }, {
+            'key': 'FSR_SHARPNESS',
+            'title': 'FSR Sharpness',
+            'describe': 'FSR RCAS Sharpness. 0 = max, 2 = none.',
+            'range': [0, 2]
         }, {
             'key': 'RENDER_RESOLUTION',
             'title': 'Render Resolution',

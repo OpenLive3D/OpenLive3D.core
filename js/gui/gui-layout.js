@@ -312,7 +312,7 @@ function setupPostProcessing(useFXAA, useMSAA, useFSR) {
     ppCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     ppScene = new THREE.Scene();
 
-    if (useFSR) {
+    if (useFSR && typeof setupFSR === 'function') {
         easuRenderTarget = new THREE.WebGLRenderTarget(displayW, displayH);
         if (useFXAA) {
             fxaaRenderTarget = new THREE.WebGLRenderTarget(renderW, renderH);
@@ -1334,7 +1334,7 @@ function drawScene() {
         renderer.setRenderTarget(ppRenderTarget);
         renderer.render(scene, camera);
 
-        if (useFSR) {
+        if (useFSR && typeof setupFSR === 'function') {
             if (ppQuad && fxaaRenderTarget) {
                 renderer.setRenderTarget(fxaaRenderTarget);
                 ppScene.add(ppQuad);

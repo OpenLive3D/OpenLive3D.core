@@ -53,6 +53,12 @@ let backgroundeffect = document.getElementById("backgroundeffect");
 backgroundeffect.width = window.innerWidth;
 backgroundeffect.height = window.innerHeight;
 
+// Cached canvas references for hot-path performance (avoids DOM lookups per frame)
+const _fgCanvas = foregroundeffect;
+const _fgCtx = _fgCanvas.getContext("2d");
+const _bgCanvas = backgroundeffect;
+const _bgCtx = _bgCanvas.getContext("2d");
+
 // 3D renderer
 let renderer = new THREE.WebGLRenderer({
     canvas: canvas,
@@ -327,12 +333,18 @@ function setupPostProcessing(useFXAA, useMSAA, useFSR) {
                 depthTest: false, depthWrite: false, blending: THREE.NoBlending, toneMapped: false
             });
             ppQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), fxaaMat);
+            ppQuad.visible = false;
+            ppScene.add(ppQuad);
         }
         setupFSR(displayW, displayH, renderW, renderH);
         fsrEASUMaterial.uniforms.tDiffuse.value = useFXAA ? fxaaRenderTarget.texture : ppRenderTarget.texture;
         fsrRCASMaterial.uniforms.tDiffuse.value = easuRenderTarget.texture;
         easuQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), fsrEASUMaterial);
+        easuQuad.visible = false;
+        ppScene.add(easuQuad);
         rcasQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), fsrRCASMaterial);
+        rcasQuad.visible = false;
+        ppScene.add(rcasQuad);
     } else {
         let fragShader = useFXAA ? _fxaaFragmentShader : _passthroughFragmentShader;
         let uniforms = { tDiffuse: { value: ppRenderTarget.texture } };
@@ -1336,24 +1348,30 @@ function drawScene() {
 
         if (useFSR && typeof setupFSR === 'function') {
             if (ppQuad && fxaaRenderTarget) {
+                ppQuad.visible = true;
+                if (easuQuad) easuQuad.visible = false;
+                if (rcasQuad) rcasQuad.visible = false;
                 renderer.setRenderTarget(fxaaRenderTarget);
-                ppScene.add(ppQuad);
                 renderer.render(ppScene, ppCamera);
-                ppScene.remove(ppQuad);
+                ppQuad.visible = false;
             }
+            if (easuQuad) easuQuad.visible = true;
+            if (rcasQuad) rcasQuad.visible = false;
+            if (ppQuad) ppQuad.visible = false;
             renderer.setRenderTarget(easuRenderTarget);
-            ppScene.add(easuQuad);
             renderer.render(ppScene, ppCamera);
-            ppScene.remove(easuQuad);
+            if (easuQuad) easuQuad.visible = false;
 
             renderer.setRenderTarget(null);
             renderer.outputEncoding = THREE.sRGBEncoding;
             if (typeof fsrRCASMaterial !== 'undefined' && fsrRCASMaterial) {
                 fsrRCASMaterial.uniforms.sharpness.value = getCMV("FSR_SHARPNESS") !== undefined ? getCMV("FSR_SHARPNESS") : 0.2;
             }
-            ppScene.add(rcasQuad);
+            if (rcasQuad) rcasQuad.visible = true;
+            if (easuQuad) easuQuad.visible = false;
+            if (ppQuad) ppQuad.visible = false;
             renderer.render(ppScene, ppCamera);
-            ppScene.remove(rcasQuad);
+            if (rcasQuad) rcasQuad.visible = false;
         } else {
             renderer.setRenderTarget(null);
             renderer.outputEncoding = THREE.sRGBEncoding;

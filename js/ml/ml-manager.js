@@ -220,10 +220,18 @@ async function postImage() {
         "mode": getCMV("TRACKING_MODE"),
         "thread": getCMV("MULTI_THREAD")
     }
-    getMLModel(modelConfig).postMessage({
+    let image = getCaptureImage();
+    let msg = {
         "metakey": getMetaKey(),
-        "image": getCaptureImage()
-    });
+        "image": image
+    };
+    let worker = getMLModel(modelConfig);
+    // Transfer ImageBitmap zero-copy to worker when available
+    if (typeof ImageBitmap !== 'undefined' && image instanceof ImageBitmap) {
+        worker.postMessage(msg, [image]);
+    } else {
+        worker.postMessage(msg);
+    }
 }
 
 // worker update

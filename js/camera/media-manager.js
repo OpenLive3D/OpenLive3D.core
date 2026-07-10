@@ -119,14 +119,28 @@ function checkImage() {
     }
 }
 
-let capImage = document.createElement("canvas");
-let capCtx = capImage.getContext('2d', {
-    willReadFrequently: true
-});
-capImage.width = defaultWidth;
-capImage.height = defaultHeight;
+let capImage;
+let capCtx;
+let useOffscreenCanvas = typeof OffscreenCanvas !== 'undefined';
+
+if (useOffscreenCanvas) {
+    capImage = new OffscreenCanvas(defaultWidth, defaultHeight);
+    capCtx = capImage.getContext('2d');
+} else {
+    capImage = document.createElement("canvas");
+    capCtx = capImage.getContext('2d', {
+        willReadFrequently: true
+    });
+    capImage.width = defaultWidth;
+    capImage.height = defaultHeight;
+}
 
 function getCaptureImage() {
     capCtx.drawImage(capture, 0, 0);
+    if (useOffscreenCanvas) {
+        // Zero-copy transferable bitmap — avoids GPU→CPU readback
+        return capImage.transferToImageBitmap();
+    }
+    // Fallback for environments without OffscreenCanvas
     return capCtx.getImageData(0, 0, defaultWidth, defaultHeight);
 }

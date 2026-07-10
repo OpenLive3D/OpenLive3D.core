@@ -27,15 +27,14 @@ function drawRain(canvas, arr) {
     ctx.lineWidth = getRainEP('width');
     ctx.lineCap = 'round';
     ctx.strokeStyle = getRainEP('color');
+    ctx.beginPath();
     for (let i = 0; i < arr.length; i++) {
         let p = arr[i];
-        ctx.beginPath();
         ctx.moveTo(p[0], p[1]);
         ctx.lineTo(p[0] + p[4] * p[2],
             p[1] + p[4] * p[3]);
-        ctx.stroke();
     }
-    ctx.fill();
+    ctx.stroke();
 }
 
 function getRandMinMax(vMin, vMax) {

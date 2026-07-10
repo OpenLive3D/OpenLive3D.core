@@ -11,43 +11,43 @@ let lasTimeDiff = 30;
 
 function weightedAvg(o1, o2, w1, w2) {
     let obj = {};
-    Object.keys(o1).forEach(function (key) {
+    for (let key in o1) {
         let v1 = o1[key] || 0;
         let v2 = o2[key] || 0;
         if (isNaN(v1)) v1 = 0;
         if (isNaN(v2)) v2 = 0;
         obj[key] = v1 + (v2 - v1) * w1 / (w1 + w2);
-    });
+    }
     return obj;
 }
 
 function calInfoDiff(o1, o2) {
     let obj = {};
-    Object.keys(o1).forEach(function (key) {
+    for (let key in o1) {
         let v1 = o1[key] || 0;
         let v2 = o2[key] || 0;
         if (isNaN(v1)) v1 = 0;
         if (isNaN(v2)) v2 = 0;
         obj[key] = v2 - v1;
-    });
+    }
     return obj;
 }
 
 function calScaleDiff(o1, w1) {
-    Object.keys(o1).forEach(function (key) {
+    for (let key in o1) {
         o1[key] *= w1;
-    });
+    }
 }
 
 function sumInfoDiff(o1, o2) {
     let obj = {};
-    Object.keys(o1).forEach(function (key) {
+    for (let key in o1) {
         let v1 = o1[key] || 0;
         let v2 = o2[key] || 0;
         if (isNaN(v1)) v1 = 0;
         if (isNaN(v2)) v2 = 0;
         obj[key] = v2 + v1;
-    });
+    }
     return obj;
 }
 
@@ -75,7 +75,7 @@ function pushInfo(newinfo) {
             }];
         } else {
             arrTimeInfo.push({
-                "time": new Date().getTime(),
+                "time": Date.now(),
                 "info": newinfo
             })
         }
@@ -105,7 +105,7 @@ function getInfo() {
     let momentumFactor = getCMV("MOMENTUM_RATIO");
     let lasTime = curTimeInfo["time"];
     let lasInfo = curTimeInfo["info"];
-    let curTime = new Date().getTime();
+    let curTime = Date.now();
     let difTime = curTime - lasTime;
     if (arrTimeInfo.length == 1) {
         curTimeInfo = arrTimeInfo[0];

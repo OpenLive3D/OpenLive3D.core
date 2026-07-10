@@ -186,6 +186,15 @@ function saveCM() {
     console.log("setting saved", tmpCMString);
 }
 
+let _saveTimeout = null;
+function debouncedSaveCM() {
+    if (_saveTimeout) clearTimeout(_saveTimeout);
+    _saveTimeout = setTimeout(function() {
+        saveCM();
+        _saveTimeout = null;
+    }, 500);
+}
+
 function clearCM() {
     setSavedConfig(null);
     console.log("cookie cleared");
@@ -290,7 +299,7 @@ function setCMV(key, value) {
         configManager[key] = value;
         if (!getSystemParameters().includes(key)) {
             if (configManager['SAVE_SETTING']) {
-                saveCM();
+                debouncedSaveCM();
             } else {
                 clearCM();
             }

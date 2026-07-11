@@ -76,10 +76,10 @@ function updateVRMMovement(keys) {
     if (currentVrm) {
         let Cbsp = currentVrm.expressionManager;
         let Ch = currentVrm.humanoid;
-        Object.keys(keys['b']).forEach(function(key) {
+        for (let key in keys['b']) {
             Cbsp.setValue(key, keys['b'][key]);
-        });
-        Object.keys(keys['r']).forEach(function(key) {
+        }
+        for (let key in keys['r']) {
             let tnode = Ch.getNormalizedBoneNode(key);
             if (tnode) {
                 let crotate = tnode.rotation;
@@ -88,27 +88,27 @@ function updateVRMMovement(keys) {
             } else {
                 console.log("missing key:", key);
             }
-        });
-        Object.keys(keys['p']).forEach(function(key) {
+        }
+        for (let key in keys['p']) {
             let tnode = Ch.getNormalizedBoneNode(key);
             if (tnode) {
-                let cposition = Ch.getNormalizedBoneNode(key).position;
+                let cposition = tnode.position;
                 let tposition = keys['p'][key];
                 cposition.set(...tposition);
             } else {
                 console.log("missing key:", key);
             }
-        });
-        Object.keys(keys['e']).forEach(function(key) {
+        }
+        for (let key in keys['e']) {
             let tnode = Ch.getNormalizedBoneNode(key);
             if (tnode) {
-                let ceuler = Ch.getNormalizedBoneNode(key).rotation;
+                let ceuler = tnode.rotation;
                 let teuler = keys['e'][key];
                 ceuler.copy(teuler);
             } else {
                 console.log("missing key:", key);
             }
-        });
+        }
         if (getCMV('TRACKING_MODE') != "Upper-Body") {
             setPoseMode(currentVrm, getCMV('TRACKING_MODE'));
         }
@@ -251,27 +251,27 @@ function updateVideoControl() {
     }
 }
 
-function updateVRMScene() {
-    currentVrm.update(clock.getDelta());
+function updateVRMScene(delta) {
+    currentVrm.update(delta);
     updateInfo();
     drawScene();
 }
 
-function updateEffect() {
-    let foregroundeffect = document.getElementById("foregroundeffect");
-    foregroundeffect.getContext("2d").clearRect(0, 0, foregroundeffect.width, foregroundeffect.height);
-    let backgroundeffect = document.getElementById("backgroundeffect");
-    backgroundeffect.getContext("2d").clearRect(0, 0, backgroundeffect.width, backgroundeffect.height);
+function updateEffect(frameDelta) {
+    let foregroundeffect = _fgCanvas;
+    _fgCtx.clearRect(0, 0, foregroundeffect.width, foregroundeffect.height);
+    let backgroundeffect = _bgCanvas;
+    _bgCtx.clearRect(0, 0, backgroundeffect.width, backgroundeffect.height);
     let alleffects = getAllEffects();
-    Object.keys(alleffects).forEach(function(key) {
+    for (let key in alleffects) {
         let effectlist = alleffects[key];
         for (let effectitem of effectlist) {
             let itemcheck = document.getElementById(effectitem['key'] + "_box");
             if (itemcheck.checked && effectitem['updateEffect']) {
-                effectitem['updateEffect'](clock.getDelta());
+                effectitem['updateEffect'](frameDelta);
             }
         }
-    });
+    }
 }
 
 function updateLog() {
@@ -288,10 +288,13 @@ async function viLoop() {
     if (currentVrm && checkImage()) {
         addCMV("VI_LOOP_COUNTER", 1);
 
+        let delta = clock.getDelta();
         updateVideoControl();
-        updateVRMScene();
-        updateEffect();
-        updateLog();
+        updateVRMScene(delta);
+        updateEffect(delta);
+        if (typeof isVisible === 'function' && isVisible("logbox")) {
+            updateLog();
+        }
 
         setTimeout(function() {
             requestAnimationFrame(viLoop);

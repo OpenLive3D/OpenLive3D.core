@@ -342,7 +342,7 @@ function getBinaryCM() {
         'MOOD_FUN', 'MOOD_JOY',
         'MOOD_NEUTRAL', 'MOOD_AUTO', 'MULTI_THREAD',
         'UI_TRACKING_MODE_COLLAPSE', 'UI_MOOD_COLLAPSE',
-        'POSITION_TRACKING', 'USE_IFACIALMOCAP'];
+        'POSITION_TRACKING', 'USE_IFACIALMOCAP', 'ALWAYS_ON_TOP'];
 }
 
 function getSelectCM() {
@@ -415,41 +415,53 @@ function getConfigModifiers() {
             'describe': 'Select to use multi-thread or not',
             'valid': [true, false]
         }],
-        'RENDERING': [{
-            'key': 'AA_MODE',
-            'title': 'Anti-Aliasing',
-            'describe': 'Select anti-aliasing and FSR upscaling.',
-            'valid': [
-                'None (Fastest)',
-                'FXAA (Fast)',
-                'MSAA 4x (Balanced)',
-                'MSAA 4x + FXAA (Quality)',
-                'FSR 1.0',
-                'FXAA + FSR 1.0',
-                'MSAA 4x + FSR 1.0'
-            ]
-        }, {
-            'key': 'UPSCALING_PRESET',
-            'title': 'FSR Quality',
-            'describe': 'FSR Resolution Presets. Custom allows manual scaling.',
-            'valid': [
-                'Ultra Quality (0.77x)',
-                'Quality (0.67x)',
-                'Balanced (0.59x)',
-                'Performance (0.50x)',
-                'Custom'
-            ]
-        }, {
-            'key': 'FSR_SHARPNESS',
-            'title': 'FSR Sharpness',
-            'describe': 'FSR RCAS Sharpness. 0 = max, 2 = none.',
-            'range': [0, 2]
-        }, {
-            'key': 'RENDER_RESOLUTION',
-            'title': 'Render Resolution',
-            'describe': 'Adjust the 3D render resolution ratio. Default is 1.0. Lower for performance, higher for quality.',
-            'range': [0.1, 2.0]
-        }],
+        'RENDERING': (function () {
+            let renderingList = [];
+            if (typeof window !== 'undefined' && ((window.entryElectron && window.entryElectron()) || typeof window.api !== 'undefined')) {
+                renderingList.push({
+                    'key': 'ALWAYS_ON_TOP',
+                    'title': 'Always on Top',
+                    'describe': 'Keep the OpenLive3D window floating on top of all other windows.',
+                    'valid': [true, false]
+                });
+            }
+            renderingList.push({
+                'key': 'AA_MODE',
+                'title': 'Anti-Aliasing',
+                'describe': 'Select anti-aliasing and FSR upscaling.',
+                'valid': [
+                    'None (Fastest)',
+                    'FXAA (Fast)',
+                    'MSAA 4x (Balanced)',
+                    'MSAA 4x + FXAA (Quality)',
+                    'FSR 1.0',
+                    'FXAA + FSR 1.0',
+                    'MSAA 4x + FSR 1.0'
+                ]
+            }, {
+                'key': 'UPSCALING_PRESET',
+                'title': 'FSR Quality',
+                'describe': 'FSR Resolution Presets. Custom allows manual scaling.',
+                'valid': [
+                    'Ultra Quality (0.77x)',
+                    'Quality (0.67x)',
+                    'Balanced (0.59x)',
+                    'Performance (0.50x)',
+                    'Custom'
+                ]
+            }, {
+                'key': 'FSR_SHARPNESS',
+                'title': 'FSR Sharpness',
+                'describe': 'FSR RCAS Sharpness. 0 = max, 2 = none.',
+                'range': [0, 2]
+            }, {
+                'key': 'RENDER_RESOLUTION',
+                'title': 'Render Resolution',
+                'describe': 'Adjust the 3D render resolution ratio. Default is 1.0. Lower for performance, higher for quality.',
+                'range': [0.1, 2.0]
+            });
+            return renderingList;
+        })(),
         'SMOOTH': [{
             'key': 'SENSITIVITY_SCALE',
             'title': 'Sensitivity Ratio',

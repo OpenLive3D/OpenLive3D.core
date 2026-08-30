@@ -334,7 +334,7 @@ function setupPostProcessing(useFXAA, useMSAA, useFSR) {
     let targetOptions = {};
     if (useMSAA) targetOptions.samples = 4;
     ppRenderTarget = new THREE.WebGLRenderTarget(renderW, renderH, targetOptions);
-    ppCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    ppCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
     ppScene = new THREE.Scene();
 
     if (useFSR && typeof setupFSR === 'function') {
@@ -918,6 +918,10 @@ function createLayout() {
                         } else {
                             startCamera();
                         }
+                    } else if (configitem['key'] === 'ALWAYS_ON_TOP') {
+                        if (window.api && typeof window.api.send === 'function') {
+                            window.api.send('set-always-on-top', item.checked);
+                        }
                     }
                 };
             } else if (getSelectCM().includes(configitem['key'])) {
@@ -1044,6 +1048,11 @@ function createLayout() {
     extraloggroup.appendChild(exportVRMRotateButton);
     logbox.appendChild(extralogkey);
     logbox.appendChild(extraloggroup);
+
+    // shortcuts section
+    if (typeof createShortcutLayout === 'function') {
+        createShortcutLayout();
+    }
 
     // about the team
     let about = document.getElementById("about");
@@ -1412,7 +1421,8 @@ function drawScene() {
             renderer.setRenderTarget(null);
             renderer.outputEncoding = THREE.sRGBEncoding;
             if (typeof fsrRCASMaterial !== 'undefined' && fsrRCASMaterial) {
-                fsrRCASMaterial.uniforms.sharpness.value = getCMV("FSR_SHARPNESS") !== undefined ? getCMV("FSR_SHARPNESS") : 0.2;
+                let sVal = parseFloat(getCMV("FSR_SHARPNESS"));
+                fsrRCASMaterial.uniforms.sharpness.value = !isNaN(sVal) ? sVal : 0.2;
             }
             if (rcasQuad) rcasQuad.visible = true;
             if (easuQuad) easuQuad.visible = false;

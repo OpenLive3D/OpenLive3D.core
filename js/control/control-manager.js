@@ -32,6 +32,7 @@ function loadVRM(vrmurl) {
             };
             resetCameraPos(pos);
             resetVRMMood();
+            _missingBoneWarned.clear();
             createMoodLayout();
             console.log("vrm model loaded");
             console.log(currentVrm);
@@ -72,6 +73,8 @@ function initialize() {
     console.log("controller initialized");
 }
 
+let _missingBoneWarned = new Set();
+
 function updateVRMMovement(keys) {
     if (currentVrm) {
         let Cbsp = currentVrm.expressionManager;
@@ -85,7 +88,8 @@ function updateVRMMovement(keys) {
                 let crotate = tnode.rotation;
                 let trotate = keys['r'][key];
                 crotate.set(...trotate);
-            } else {
+            } else if (!_missingBoneWarned.has('r_' + key)) {
+                _missingBoneWarned.add('r_' + key);
                 console.log("missing key:", key);
             }
         }
@@ -95,7 +99,8 @@ function updateVRMMovement(keys) {
                 let cposition = tnode.position;
                 let tposition = keys['p'][key];
                 cposition.set(...tposition);
-            } else {
+            } else if (!_missingBoneWarned.has('p_' + key)) {
+                _missingBoneWarned.add('p_' + key);
                 console.log("missing key:", key);
             }
         }
@@ -105,7 +110,8 @@ function updateVRMMovement(keys) {
                 let ceuler = tnode.rotation;
                 let teuler = keys['e'][key];
                 ceuler.copy(teuler);
-            } else {
+            } else if (!_missingBoneWarned.has('e_' + key)) {
+                _missingBoneWarned.add('e_' + key);
                 console.log("missing key:", key);
             }
         }

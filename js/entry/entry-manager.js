@@ -27,7 +27,7 @@ window.browserCheck = function() {
 console.log("Browser:", window.browserCheck());
 
 window.entryElectron = function() {
-    return window && window.process && window.process.type == 'renderer';
+    return (typeof window !== 'undefined') && (typeof window.api !== 'undefined' || (window.process && window.process.type == 'renderer'));
 };
 console.log("Electron:", window.entryElectron());
 

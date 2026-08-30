@@ -69,7 +69,8 @@ void main() {
     float len = length(dir);
     if (len > 0.0) dir /= len;
     
-    float weight = clamp(len / max(max(eL, fL), max(iL, jL)), 0.0, 1.0);
+    float maxLuma = max(max(eL, fL), max(iL, jL));
+    float weight = maxLuma > 1e-5 ? clamp(len / maxLuma, 0.0, 1.0) : 0.0;
     weight *= weight;
 
     // Bilinear fallback for non-edge
@@ -121,14 +122,14 @@ void main() {
     w = w * s * 0.5;
     
     vec3 color = (b + dC + f + h) * (-w) + e;
-    color /= (1.0 - 4.0 * w);
+    color /= max(0.001, (1.0 - 4.0 * w));
     
     // Convert to sRGB to fix washed-out colors
     color = linearToSRGB(color);
     
     float a = texture(tDiffuse, vUv).a;
     fragColor = vec4(clamp(color, 0.0, 1.0), a);
-}`;
+} `;
 
 function setupFSR(displayW, displayH, renderW, renderH) {
     if (!fsrEASUMaterial) {
@@ -147,6 +148,7 @@ function setupFSR(displayW, displayH, renderW, renderH) {
             },
             vertexShader: fsrVertexShader,
             fragmentShader: fsrEASUFragmentShader,
+            side: THREE.DoubleSide,
             depthTest: false,
             depthWrite: false,
             blending: THREE.NoBlending
@@ -171,6 +173,7 @@ function setupFSR(displayW, displayH, renderW, renderH) {
             },
             vertexShader: fsrVertexShader,
             fragmentShader: fsrRCASFragmentShader,
+            side: THREE.DoubleSide,
             depthTest: false,
             depthWrite: false,
             blending: THREE.NoBlending

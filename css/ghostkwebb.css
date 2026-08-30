@@ -1,10 +1,42 @@
 /* Ghostkwebb Theme - Refined Clean Style */
 
 /* Global Font and Reset */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    background-color: transparent !important;
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+    display: none;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     color: #e0e0e0;
+}
+
+canvas.vrm {
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    z-index: 1;
+}
+
+div.bgimg {
+    position: absolute;
+    background-size: cover;
+    top: 0%;
+    left: 0%;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
 }
 
 /* Sidebar - Clean Dark Mode */
@@ -19,14 +51,14 @@ body {
 
 /* Main Settings Sidebar (#thesidebar) */
 #thesidebar {
-    top: 80px !important;
+    top: 100px !important;
     /* Position below the logo */
     left: 20px !important;
     bottom: auto !important;
     transform: none !important;
     /* Remove vertical centering */
     height: auto !important;
-    max-height: calc(100vh - 100px);
+    max-height: calc(100vh - 120px);
     /* Prevent overflow */
     overflow-y: auto;
     /* Scroll if needed */
@@ -52,11 +84,11 @@ body {
 /* Floating Bars (Mood and Pose) */
 #themoodbar,
 #theposebar {
-    top: 80px !important;
+    top: 100px !important;
     bottom: auto !important;
     transform: none !important;
     height: auto !important;
-    max-height: calc(100vh - 100px);
+    max-height: calc(100vh - 120px);
     border-radius: 24px;
 
     width: 60px !important;
@@ -73,6 +105,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 1000;
 }
 
 #themoodbar {
@@ -316,7 +349,7 @@ div.systembox {
     white-space: nowrap;
     cursor: pointer;
     position: absolute;
-    top: 20px;
+    top: 38px;
     left: 20px;
     z-index: 1001;
     /* Above sidebar */

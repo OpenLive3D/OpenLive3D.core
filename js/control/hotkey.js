@@ -57,4 +57,57 @@ function userInputKey(e) {
   }
 }
 
-onKeyUpHook(userInputKey);
+function createShortcutLayout() {
+    let shortcutbtn = document.getElementById("shortcutboxbutton");
+    if (!shortcutbtn) return;
+    shortcutbtn.innerHTML = typeof getL === 'function' ? getL("Shortcuts") : "Shortcuts";
+    let shortcutbox = document.getElementById("shortcutbox");
+    if (!shortcutbox) return;
+    shortcutbox.innerHTML = "";
+
+    const isMac = typeof navigator !== 'undefined' && navigator.platform && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const cmdKey = isMac ? "⌘" : "Ctrl+";
+
+    const shortcuts = [
+        { key: `${cmdKey}B / H`, desc: "Hide / Show Sidebars" },
+        { key: `${cmdKey}\\`, desc: "Hide / Show All UI (Stream Mode)" },
+        { key: `${cmdKey},`, desc: "Toggle Settings Drawer" },
+        { key: "Esc", desc: "Close Settings Drawer" },
+        { key: `${cmdKey}0`, desc: "Reset Camera View" },
+        { key: `${cmdKey}O`, desc: "Open VRM Model File..." },
+        { key: `${cmdKey}1 / F`, desc: "Face-Only Tracking Mode" },
+        { key: `${cmdKey}2 / H`, desc: "Upper-Body Tracking Mode" },
+        { key: "1 - 8", desc: "Trigger Moods / Expressions" },
+        { key: "Drag & Drop", desc: "Drop VRM / Image into Window" }
+    ];
+
+    let table = document.createElement("table");
+    table.className = "shortcut-table";
+
+    shortcuts.forEach(s => {
+        let row = document.createElement("tr");
+
+        let kCell = document.createElement("td");
+        kCell.className = "shortcut-key-cell";
+
+        let kbd = document.createElement("kbd");
+        kbd.innerHTML = s.key;
+        kCell.appendChild(kbd);
+
+        let dCell = document.createElement("td");
+        dCell.className = "shortcut-desc-cell";
+        dCell.innerHTML = s.desc;
+
+        row.appendChild(kCell);
+        row.appendChild(dCell);
+        table.appendChild(row);
+    });
+
+    shortcutbox.appendChild(table);
+}
+
+if (typeof onKeyUpHook === 'function') {
+    onKeyUpHook(userInputKey);
+} else {
+    window.addEventListener('keyup', userInputKey);
+}

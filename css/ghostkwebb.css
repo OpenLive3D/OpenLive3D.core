@@ -16,6 +16,50 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     display: none;
 }
 
+/* Native macOS Window Drag Regions */
+.mac-titlebar-drag {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 38px;
+    -webkit-app-region: drag;
+    z-index: 999;
+}
+
+.mac-edge-drag {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 18px;
+    -webkit-app-region: drag;
+    z-index: 998;
+}
+
+.mac-edge-drag-left {
+    left: 0;
+}
+
+.mac-edge-drag-right {
+    right: 0;
+}
+
+/* Interactive elements must not trigger window drag */
+.systembox,
+.w3-sidebar,
+#themoodbar,
+#theposebar,
+#thesidebar,
+.alertbox,
+.loadbox,
+button,
+select,
+input,
+a,
+kbd {
+    -webkit-app-region: no-drag;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;

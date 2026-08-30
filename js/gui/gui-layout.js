@@ -1049,7 +1049,7 @@ function createMoodLayout() {
     moodbar.innerHTML = "";
     let tmp = document.createElement("div");
     tmp.className = "w3-bar-item";
-    tmp.style.height = "80px";
+    tmp.style.height = "100px";
     tmp.style.color = "#0000";
     tmp.innerHTML = ".";
     moodbar.appendChild(tmp);

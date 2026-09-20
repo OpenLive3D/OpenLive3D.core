@@ -1,3 +1,12 @@
+// Shadow the ambient global that a page's debug canvas (any id="dbg"
+// element implicitly becomes window.dbg via the DOM) can create. Emscripten's
+// glue code guards its internal debug-logging hook with `typeof dbg`, and a
+// bare `let dbg;` here - sharing this page's global lexical scope with every
+// other classic script, including vision_bundle.js - takes precedence over
+// window's own/named properties for that lookup, without requiring any
+// particular id name in the consuming page's HTML.
+let dbg;
+
 class Single {
     fLandmarker = null;
     fLandmarkerReady = null;

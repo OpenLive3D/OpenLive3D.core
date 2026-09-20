@@ -15,10 +15,11 @@ class Single {
 
     constructor(cb) {
         this.cb = cb;
-        this.fLandmarkerReady = FilesetResolver.forVisionTasks("ol3dc/vision/wasm").then((filesetResolver) => {
+        let ipath = getCMV("INTEGRATION_SUBMODULE_PATH");
+        this.fLandmarkerReady = FilesetResolver.forVisionTasks(ipath + "/vision/wasm").then((filesetResolver) => {
             return FaceLandmarker.createFromOptions(filesetResolver, {
                 baseOptions: {
-                    modelAssetPath: "ol3dc/vision/face_landmarker.task",
+                    modelAssetPath: ipath + "/vision/face_landmarker.task",
                     delegate: "GPU"
                 },
                 runningMode: "IMAGE",
@@ -47,9 +48,10 @@ class Single {
     async postMessage(data) {
         if (data["metakey"] && data["image"]) {
             this.metakey = data["metakey"];
-            await this.fLandmarkerReady;
+            let image = data["image"];
             try {
-                let raw = await this.fLandmarker.detect(data["image"]);
+                await this.fLandmarkerReady;
+                let raw = await this.fLandmarker.detect(image);
                 this.cb({
                     "data": {
                         "metakey": this.metakey,
@@ -58,6 +60,10 @@ class Single {
                 });
             } catch (err) {
                 console.log(err);
+            } finally {
+                if (image && typeof image.close === "function") {
+                    image.close();
+                }
             }
         }
     }

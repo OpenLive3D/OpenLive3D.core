@@ -144,3 +144,21 @@ function getCaptureImage() {
     // Fallback for environments without OffscreenCanvas
     return capCtx.getImageData(0, 0, defaultWidth, defaultHeight);
 }
+
+// pause the camera while the tab is in the background (saves the camera
+// hardware and avoids the health-check misreading a throttled background
+// tab's near-zero FPS as a hardware/performance problem), and resume it
+// when the tab is visible again - but only if the camera is actually
+// supposed to be on (respects a manual "Toggle Camera" off, and skips
+// resuming entirely when iFacialMocap is the active tracking source).
+document.addEventListener("visibilitychange", function() {
+    if (document.hidden) {
+        if (window.stream) {
+            stopCamera();
+        }
+    } else {
+        if (!getCMV('TOGGLE_CAMERA') && !getCMV('USE_IFACIALMOCAP')) {
+            startCamera();
+        }
+    }
+});

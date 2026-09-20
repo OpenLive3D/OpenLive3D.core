@@ -155,7 +155,7 @@ function loadVRMModel(url, cb, ecb) {
             setDefaultPose(vrm);
             cb(vrm);
         },
-        (progress) => console.log('Loading model...', 100.0 * (progress.loaded / progress.total), '%'),
+        (progress) => console.log('Loading model...', Math.min(100, 100.0 * (progress.loaded / progress.total)), '%'),
         (error) => {
             ecb();
             console.error(error);

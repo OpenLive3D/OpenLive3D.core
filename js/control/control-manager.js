@@ -46,7 +46,6 @@ function loadVRM(vrmurl) {
             }
         });
     setMood(getCMV('DEFAULT_MOOD'));
-    setLogAPI(getSavedConfigString());
 }
 
 function getMetaVersion() {

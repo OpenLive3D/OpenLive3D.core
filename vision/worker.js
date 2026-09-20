@@ -5,35 +5,40 @@ self.importScripts("vision_bundle.js");
 const workerRole = self.name === "holistic" ? "holistic" : "face";
 
 let landmarker = null;
+let landmarkerReady = null;
 let metakey = 0;
 
-async function initLandmarker() {
-    const filesetResolver = await FilesetResolver.forVisionTasks("wasm");
-    if (workerRole === "holistic") {
-        landmarker = await HolisticLandmarker.createFromOptions(filesetResolver, {
-            baseOptions: {
-                modelAssetPath: "holistic_landmarker.task",
-                delegate: "GPU"
-            },
-            runningMode: "IMAGE",
-            minFaceDetectionConfidence: 0.5,
-            minPoseDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.55
-        });
-    } else {
-        landmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
-            baseOptions: {
-                modelAssetPath: "face_landmarker.task",
-                delegate: "GPU"
-            },
-            runningMode: "IMAGE",
-            numFaces: 1,
-            outputFaceBlendshapes: false,
-            minFaceDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.55
-        });
-    }
-    console.log(workerRole + " worker initialization!");
+function initLandmarker() {
+    landmarkerReady = FilesetResolver.forVisionTasks("wasm").then((filesetResolver) => {
+        if (workerRole === "holistic") {
+            return HolisticLandmarker.createFromOptions(filesetResolver, {
+                baseOptions: {
+                    modelAssetPath: "holistic_landmarker.task",
+                    delegate: "GPU"
+                },
+                runningMode: "IMAGE",
+                minFaceDetectionConfidence: 0.5,
+                minPoseDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.55
+            });
+        } else {
+            return FaceLandmarker.createFromOptions(filesetResolver, {
+                baseOptions: {
+                    modelAssetPath: "face_landmarker.task",
+                    delegate: "GPU"
+                },
+                runningMode: "IMAGE",
+                numFaces: 1,
+                outputFaceBlendshapes: false,
+                minFaceDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.55
+            });
+        }
+    }).then((created) => {
+        landmarker = created;
+        console.log(workerRole + " worker initialization!");
+        return created;
+    });
 }
 initLandmarker();
 
@@ -59,16 +64,27 @@ function unwrapResults(raw) {
 }
 
 onmessage = async e => {
-    if (landmarker && e.data && e.data["metakey"] && e.data["image"]) {
+    if (e.data && e.data["metakey"] && e.data["image"]) {
         metakey = e.data["metakey"];
+        let image = e.data["image"];
         try {
-            let raw = await landmarker.detect(e.data["image"]);
+            // wait for the model rather than dropping the frame - matters
+            // most right after switching tracking modes, when this worker's
+            // landmarker may still be loading for the first time.
+            await landmarkerReady;
+            let raw = await landmarker.detect(image);
             postMessage({
                 "metakey": metakey,
                 "results": unwrapResults(raw)
             });
         } catch (err) {
             console.log(err);
+        } finally {
+            // release the transferred ImageBitmap's backing memory; a plain
+            // ImageData (non-OffscreenCanvas fallback) has no close() to call.
+            if (image && typeof image.close === "function") {
+                image.close();
+            }
         }
     }
 }

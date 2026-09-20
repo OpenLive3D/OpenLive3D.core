@@ -101,37 +101,51 @@ function normalize3d(p1) {
 }
 
 // holistic worker
+// each model is loaded lazily, on first actual use, so a session that never
+// leaves Face-Only tracking never downloads the (much larger) holistic model,
+// and multi-thread sessions never load the single-thread face model at all.
 let hworkerM = null;
 let fworkerM = null;
 let fworkerS = null;
+let mlOnResults = null;
 
 function loadMLModels(onResults) {
-    let ipath = getCMV("INTEGRATION_SUBMODULE_PATH");
-    let hpath = ipath + "/holistic/worker.js";
-    let fpath = ipath + "/face_mesh/worker.js";
-    hworkerM = new Worker(hpath);
-    hworkerM.onmessage = onResults;
-    fworkerM = new Worker(fpath);
-    fworkerM.onmessage = onResults;
-    fworkerS = new Single(onResults);
-    fworkerS.init();
-    console.log("holistic model connected");
+    mlOnResults = onResults;
+    console.log("ml manager connected");
 }
 
 function getMLModel(modelConfig) {
+    let ipath = getCMV("INTEGRATION_SUBMODULE_PATH");
+    let vpath = ipath + "/vision/worker.js";
     if (!modelConfig["thread"]) {
+        if (!fworkerS) {
+            fworkerS = new Single(mlOnResults);
+            fworkerS.init();
+        }
         return fworkerS;
     } else if (modelConfig["mode"] == "Upper-Body") {
+        if (!hworkerM) {
+            hworkerM = new Worker(vpath, {
+                name: "holistic"
+            });
+            hworkerM.onmessage = mlOnResults;
+        }
         return hworkerM;
     } else {
+        if (!fworkerM) {
+            fworkerM = new Worker(vpath, {
+                name: "face"
+            });
+            fworkerM.onmessage = mlOnResults;
+        }
         return fworkerM;
     }
 }
 
 function checkMLModel() {
-    if (hworkerM && fworkerM && fworkerS) {
-        return true;
-    } else {
-        return false;
-    }
+    let modelConfig = {
+        "mode": getCMV("TRACKING_MODE"),
+        "thread": getCMV("MULTI_THREAD")
+    };
+    return !!getMLModel(modelConfig);
 }

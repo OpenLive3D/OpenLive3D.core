@@ -1,6 +1,6 @@
 // version configuration
-const DEV_DATE = "2026-09-13";
-const VERSION = "v.2.6.3";
+const DEV_DATE = "2026-09-20";
+const VERSION = "v.2.7.0";
 const CONFIG_VERSION = "Beta.1.2.12";
 
 let configManager = {};

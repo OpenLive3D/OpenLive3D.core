@@ -53,6 +53,14 @@ function checkVIHealthQueue(state) {
 }
 
 function checkHealth() {
+    // don't monitor / raise alerts until OpenLive3D has actually finished
+    // starting up (VRM + ML models loaded, render loop running) - before
+    // that, VI/ML FPS are legitimately 0 and would otherwise trigger
+    // spurious "Hardware Acceleration" / "Full Screen" alerts. Same for a
+    // backgrounded tab, where browsers throttle rAF/timers on purpose.
+    if (getCMV("LOADING_SCENE") || document.hidden) {
+        return;
+    }
     let viFPS = getCMV("VI_LOOP_COUNTER") / getCMV("HEALTH_RATE");
     let mlFPS = getCMV("ML_LOOP_COUNTER") / getCMV("HEALTH_RATE");
     let dynamicVIDura = getCMV("DYNA_VI_DURATION");

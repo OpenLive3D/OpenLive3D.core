@@ -483,7 +483,7 @@ function setBackGround() {
 }
 
 function setCameraCallBack() {
-    let dbg = document.getElementById("dbg");
+    let dbg = document.getElementById("dbgcanvas");
     let instantFrame = getCameraFrame();
     dbg.width = Math.floor(
         instantFrame.videoWidth * getCMV('CANVAS_RATIO'));
@@ -665,7 +665,7 @@ function createLayout() {
         console.log("set camera: ", videoselect.value);
         setVideoStream(videoselect.value);
     }
-    let dbg = document.getElementById("dbg");
+    let dbg = document.getElementById("dbgcanvas");
     dbg.style.width = "100%";
     let dbgimcheck = document.getElementById("dbgimcheck");
     if (getCMV("DEBUG_IMAGE")) {
@@ -1262,7 +1262,7 @@ function setMoodSelect(newmood) {
 function clearDebugCvs() {
     if (isVisible("dbgbox")) {
         // get debug camera canvas
-        let dbg = document.getElementById("dbg").getContext('2d');
+        let dbg = document.getElementById("dbgcanvas").getContext('2d');
         dbg.clearRect(0, 0, dbg.canvas.width, dbg.canvas.height);
         dbg.fillStyle = 'rgba(0,0,0,0.8)';
         dbg.fillRect(0, 0, dbg.canvas.width, dbg.canvas.height);
@@ -1272,7 +1272,7 @@ function clearDebugCvs() {
 function drawImage(image) {
     if (isVisible("dbgbox")) {
         // get debug camera canvas
-        let dbg = document.getElementById("dbg").getContext('2d');
+        let dbg = document.getElementById("dbgcanvas").getContext('2d');
         dbg.save();
         if (getCMV('CAMERA_FLIP')) {
             dbg.translate(dbg.canvas.width, 0);
@@ -1315,7 +1315,7 @@ const MARKCOLOR = {
 function drawLandmark(landmark) {
     if (isVisible("dbgbox")) {
         // get debug camera canvas
-        let dbg = document.getElementById("dbg").getContext('2d');
+        let dbg = document.getElementById("dbgcanvas").getContext('2d');
         dbg.save();
         if (getCMV('CAMERA_FLIP')) {
             dbg.translate(dbg.canvas.width, 0);
